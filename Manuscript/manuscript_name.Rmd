@@ -1,0 +1,64 @@
+---
+title: TITLE
+authors:
+  - name: 
+    department: 
+    affiliation: 
+    location: 
+  - name: 
+    department: 
+    affiliation: 
+    location: 
+  - name: 
+    department: 
+    affiliation: 
+    location: 
+    email: 
+abstract: |
+  ABSTRACT HERE.
+keywords:
+  - 
+bibliography: references.bib
+biblio-style: unsrt
+output:
+  rticles::arxiv_article:
+          keep_tex: false
+  word_document: default
+header-includes: 
+  \usepackage{float} \floatplacement{figure}{H} 
+  \newcommand{\beginsupplement}{\setcounter{table}{0}  \renewcommand{\thetable}{S\arabic{table}} \setcounter{figure}{0} \renewcommand{\thefigure}{S\arabic{figure}}}
+---
+
+# Introduction {.unnumbered}
+
+# Methods {.unnumbered}    
+## Statistical Analysis {.unnumbered}   
+# Results {.unnumbered}
+
+```{r, figure, echo = F, out.width = "300px"}
+#| fig.cap = "CAPTION HERE."
+
+knitr::include_graphics("../Output/Figures/_PATH_")
+```
+
+```{r, table, echo = F}
+kable(digits = 3, align = "c",
+      caption = "CAPTION HERE")
+```
+
+
+# Discussion {.unnumbered}    
+
+\newpage    
+```{=tex}
+\beginsupplement
+```
+
+# Supplementary Material {.unnumbered}      
+
+```{r supp-fig-1, echo = F, out.width = "300px"}
+#| fig.cap = "CAPTION HERE."
+
+knitr::include_graphics("../Output/Figures/_PATH_")
+```
+

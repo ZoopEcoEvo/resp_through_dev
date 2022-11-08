@@ -1,0 +1,42 @@
+---
+title: TITLE HERE
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+          code_folding: hide
+          code_download: true
+          toc: true
+          toc_float: true
+  github_document:
+          html_preview: false
+          toc: true
+          toc_depth: 3
+---
+
+```{r setup, include=T, message = F, warning = F, echo = F}
+knitr::opts_chunk$set(
+  echo = knitr::is_html_output(),
+  fig.align = "center",
+  fig.path = "../Figures/markdown/",
+  message = FALSE,
+  warning = FALSE,
+  collapse = T,
+  dev = c("png", "pdf")
+)
+
+theme_matt = function(base_size){
+  ggpubr::theme_pubr(base_family="sans") %+replace% 
+    theme(
+      panel.background  = element_blank(),
+      plot.background = element_rect(fill="transparent", colour=NA), 
+      legend.background = element_rect(fill="transparent", colour=NA),
+      legend.key = element_rect(fill="transparent", colour=NA),
+      legend.text = element_text(size=base_size * 0.9),
+      legend.title = element_text(size = base_size * 0.9, 
+                                  face = "bold"),
+      axis.text = element_text(size = base_size),
+      axis.title = element_text(size = base_size * 1.2),
+      title = element_text(size = base_size * 1.55)
+    )
+}
+```
