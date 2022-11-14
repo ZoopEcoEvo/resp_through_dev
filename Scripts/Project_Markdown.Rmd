@@ -1,0 +1,949 @@
+---
+title: "Mat H-H Masters Thesis Data Analysis"
+author: "Mathew Holmes-Hackerd"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    code_folding: hide
+---
+
+# Setup 
+```{r setup, include=TRUE}
+
+knitr::opts_chunk$set(echo = T, warning = F, message = F, fig.align = "left", fig.path = "../Output/Figures/Markdown/",dev = c('png', 'pdf'))
+
+
+library(readxl)
+library(writexl)
+library(knitr)
+library(tidyverse)
+library(tidyr)
+library(ggpubr)
+library(ggExtra)
+library(dplyr)
+library(respR)
+library(gridExtra)
+library(car)
+library(DT)
+library(survival)
+library(ranger)
+library(survminer)
+library(ggfortify)
+library(emmeans)
+#library(plotrix)
+library(MASS)
+
+theme_mat = function(base_size){
+  ggpubr::theme_pubr(base_family="serif") %+replace% 
+    theme(
+      panel.background  = element_blank(),
+      plot.background = element_rect(fill="transparent", colour=NA), 
+      legend.background = element_rect(fill="transparent", colour=NA),
+      text = element_text(size = base_size)
+      )
+}
+
+treatment_color_vector = c("control" = "lightskyblue",
+                 "heatstress" = "tomato2")  #creates color vector
+
+group_color_vector = c("Control" = "lightskyblue",
+                       "Copepod" = "tomato2")
+
+handling_con_color_vector = c("active" = "cadetblue1",
+                          "backup" = "blue3")
+
+handling_hs_color_vector = c("active" = "firebrick1", 
+                             "backup" = "darkred")
+
+
+group_color_vector1 = c("Control" = "black",
+                       "Copepod" = "gold")
+  
+
+```
+
+
+# Carpentry and Analysis 
+``` {r Copepodite Respiration-Size-Molt Analysis, include=TRUE}
+#Respiration Analysis
+
+
+#Creates list of files containing oxygen data
+file_list_resp = dir("Data/Respiration")
+file_list_bs = dir("Data/Body_size")
+file_list_molts = dir("Data/Molts")
+
+
+#Creates empty data frame to store data after processing
+resp_rates = data.frame()
+o2_record = data.frame()
+bg_resp_rates = data.frame()
+molt_record = data.frame()
+
+#Start of loop through respiration folder
+for(i in 1:length(file_list_resp)){
+ 
+  #unlist and store meta data from file name 
+  meta = unlist(str_split(file_list_resp[i], pattern = "_"))
+  
+  #meta data from file names
+  replicate = meta[1]
+  month = meta[2]
+  day = meta[3]
+  
+  #records date of measurement
+  daily_track = paste(replicate, month, day, sep = "_")
+  
+  #Will be used later to match data files for different traits
+  file_name = unlist(str_split(file_list_resp[i], pattern = "_Oxygen"))[1]
+
+  #Reads in oxygen data
+  Oxygen_Data = read_excel(path = paste("Data/Respiration", file_list_resp[i], sep = "/"))
+  
+  #Puts Oxygen excel file into DPLYR format
+  Oxygen_Data = as.tibble(Oxygen_Data)
+  
+   #Removes acclimation time, only looks at >300 min portion of runs
+  Oxygen_Data_acc = Oxygen_Data[Oxygen_Data$`Time/Min.` > 350 ,]
+  
+  #Gets rid of empty sensor slots
+  O2_adj <- Oxygen_Data_acc %>% select_if(is.numeric)
+  
+  #Import body size measurements
+   Body_Size_Data = read_excel(path = paste("Data/Body_Size", file_list_bs[i], sep = "/"))
+   
+  #Set control and test columns
+  Control_cols = which(str_detect(colnames(O2_adj), pattern = "Control"))
+  Exp_cols = which(str_detect(colnames(O2_adj), pattern = "Test"))
+  
+  
+  #Calculates background rates of oxygen depletion
+  bg = calc_rate.bg(O2_adj, time = 1, oxygen = Control_cols, plot = F)
+  
+  #Creates empty object to store background resp rate values
+  bg_rates = c()
+  bg_rates = c(bg_rates, bg$rate.bg)
+
+  #Creates empty objects to store rate values
+  rates = c()
+  
+  #start of loop going through individual vials (columns)
+  for(j in Exp_cols){
+    
+  resp_rate = O2_adj %>%
+    dplyr::select(`Time/Min.`, colnames(O2_adj)[j])%>%
+    calc_rate(plot = F)
+  
+  rates = c(rates, resp_rate$rate)
+  
+  } #end of vial (column) loop
+
+#store vial and background vial names
+vial_names = colnames(O2_adj)[Exp_cols]
+bg_vial_names = colnames(O2_adj)[Control_cols]
+
+resp_data = data.frame("vial" = vial_names, 
+                         "file" = i, #from the `for loop` used to cycle through all available oxygen data files
+                         "replicate" = replicate,
+                         "resp_rate" =  rates)
+
+bg_resp_data = data.frame("vial" = bg_vial_names, 
+                         "file" = i, #from the `for loop` used to cycle through all available oxygen data files
+                         "replicate" = replicate,
+                         "bg_rate" = bg_rates)
+
+#Import body lengths (in mm)
+  length_data = readxl::read_excel(path = paste("Data/Body_Size/", file_name, "_bodysize.xlsx", sep = "")) 
+  
+  #Adds body length data to this data set
+  resp_data = inner_join(resp_data, length_data, by = "vial")
+  
+  #Creates replicate-specific id
+  resp_data = resp_data%>%
+    mutate("id" = paste(replicate, id, sep = "_"))
+  
+   #convert length in mm to um
+   resp_data$length_um = (resp_data$body_length)*1000
+   
+   #Length-weight conversion from Berggreen et al 1988. inputs are length (um), output is body weight (ng C)
+   resp_data$weight_ngC = 1.11 * 10^-5 * (resp_data$length_um)^2.92
+   
+   #convert weight from ngC to kgC necesary for convert_rate function below
+   resp_data$weight_kgC = (resp_data$weight_ngC) / 1000000000000
+  
+  #Inputs should be in % Air. Sat, minutes, kilograms, liters
+  #Output is mL Oxygen per hour per mg dry weight
+  mass_conv = convert_rate(resp_data$resp_rate,
+                           oxy.unit = "%Oxy",
+                           time.unit = "m",
+                           output.unit = "mL/h/mg",
+                           mass = resp_data$weight_kgC,
+                           volume = 0.0028,
+                           S = O2_adj$`Salinity [g/1000g]`[1],
+                           t = mean(O2_adj$`Tm [°C]`),
+                           P = (O2_adj$`p [mbar]`[1]/1000))
+  
+  raw_conv = convert_rate(resp_data$resp_rate,
+                           oxy.unit = "%Oxy",
+                           time.unit = "m",
+                           output.unit = "mL/h",
+                           mass = NULL,
+                           volume = 0.0028,
+                           S = O2_adj$`Salinity [g/1000g]`[1],
+                           t = mean(O2_adj$`Tm [°C]`),
+                           P = (O2_adj$`p [mbar]`[1]/1000))
+  
+
+  #storage of respiration rates in resp_data df
+  resp_data$mass_spec_resp = mass_conv$rate.output
+  resp_data$resp_mL_h = raw_conv$rate.output
+  resp_rates = bind_rows(resp_rates, resp_data)
+  bg_resp_rates = bind_rows(bg_resp_rates, bg_resp_data)
+  
+  #storage of replicate and day of measurement to create replicate-specific ID
+  O2_adj$rep = i
+  O2_adj$day_id = daily_track
+  o2_record = bind_rows(o2_record, O2_adj)
+
+} #end of I (individual file) loop
+
+#transforms all respiration measurments into positive values
+resp_rates$resp_rate = resp_rates$resp_rate * -1
+resp_rates$mass_spec_resp = resp_rates$mass_spec_resp * -1
+resp_rates$resp_mL_h = resp_rates$resp_mL_h * -1
+
+#start of molt tracking loop
+for(i in 1:length(file_list_molts)){
+  
+#grabs replicate data from file name
+meta = unlist(str_split(file_list_molts[i], pattern = "_"))
+  
+replicate = meta[1]  
+  
+#Read in molt data
+raw_molt_data = read_xlsx(path = paste("Data/Molts", file_list_molts[i], sep = "/"))
+
+#create replicate-specific unique ID
+raw_molt_data = raw_molt_data %>%
+   mutate("id" = paste(replicate, id, sep = "_"))
+
+#cleans up molt data df for simplification of joining df's
+molt_data = raw_molt_data %>%
+  pivot_longer(cols = c(-id,-treatment,-sex, -group, -source_cup),   
+               names_to = "date", 
+               values_to = "stage")%>% 
+
+  mutate(date = str_replace_all(string = date, pattern = "_", replacement = "/"), #replaces all _'s with /'s
+         date = parse_date(date, format = "%m/%d/%Y"),
+         days = as.numeric(date-first(date)))   
+
+molt_record = bind_rows(molt_record, molt_data)
+}
+ 
+#join molt data w/ resp_rates data
+full_dataset = inner_join(resp_rates,molt_record, by = c("id", "stage"))%>%
+  group_by(id, stage)%>%
+  filter(date == min(date))%>%
+  ungroup(stage)%>%
+  mutate("stage_duration" = lead(days) - days)
+```           
+
+
+```{r Nauplii Respiration/Size/Molt Analysis, include=TRUE}
+
+#Creates list of files containing oxygen data
+file_list_resp = dir("Data/Nauplii/Respiration")
+file_list_bs = dir("Data/Nauplii/Body_Size")
+
+
+#Creates empty data frame to store data after processing
+naup_resp_rates = data.frame()
+naup_o2_record = data.frame()
+naup_bg_resp_rates = data.frame()
+
+#Start of loop through respiration folder
+for(i in 1:length(file_list_resp)){
+ 
+  #unlist and store meta data from file name 
+  meta = unlist(str_split(file_list_resp[i], pattern = "_"))
+  
+  #meta data from file names
+  replicate = meta[1]
+  naup = meta[2]
+  temp = meta[3]
+  
+  #Will be used later to match data files for different traits
+  file_name = unlist(str_split(file_list_resp[i], pattern = "_Oxygen"))[1]
+  
+  #Reads in oxygen data
+  Oxygen_Data = read_excel(path = paste("Data/Nauplii/Respiration", file_list_resp[i], sep = "/"))
+  
+  #Puts Oxygen excel file into DPLYR format
+  Oxygen_Data = as.tibble(Oxygen_Data)
+  
+   #Removes acclimation time, only looks at >300 min portion of runs
+  Oxygen_Data_acc = Oxygen_Data[Oxygen_Data$`Time/Min.` > 350 ,]
+  
+  #Gets rid of empty sensor slots
+  O2_adj <- Oxygen_Data_acc %>% select_if(is.numeric)
+  
+  O2_adj = na.omit(O2_adj)
+   
+  #Set control and test columns
+  Control_cols = which(str_detect(colnames(O2_adj), pattern = "Control"))
+  Exp_cols = which(str_detect(colnames(O2_adj), pattern = "Test"))
+  
+  
+  #Calculates background rates of oxygen depletion
+  #bg_insp = inspect(O2_adj, time = 1, oxygen = Exp_cols, plot = F)
+  bg = calc_rate.bg(O2_adj, time = 1, oxygen = Control_cols, plot = F)
+  
+  #Creates empty object to store background resp rate values
+  naup_bg_rates = c()
+  naup_bg_rates = c(naup_bg_rates, bg$rate.bg)
+
+  #Creates empty objects to store rate values
+  naup_rates = c()
+  
+  #removes NAs from oxygen data
+  drop_na(O2_adj)
+  
+  
+  
+  for(j in Exp_cols){
+  
+  resp_rate = O2_adj %>%
+    dplyr::select(`Time/Min.`, colnames(O2_adj)[j]) %>%
+    calc_rate(plot = F)
+  
+  naup_rates = c(naup_rates, resp_rate$rate)
+  
+  
+  
+    
+ 
+  
+  
+  } #End J (column) loop
+  
+
+ 
+
+vial_names = colnames(O2_adj)[Exp_cols]
+bg_vial_names = colnames(O2_adj)[Control_cols]
+
+naup_resp_data = data.frame("vial" = vial_names, 
+                         "replicate" = replicate,
+                         "resp_rate" =  naup_rates,
+                         "temp" = temp)
+
+bg_resp_data = data.frame("vial" = bg_vial_names, 
+                         "replicate" = replicate,
+                         "bg_rate" = naup_bg_rates)
+
+#Import body lengths (currently in mm)
+  length_data = readxl::read_excel(path = paste("Data/Nauplii/Body_Size/", file_name, "_bodysize.xlsx", sep = "")) 
+  
+  #unlist and store meta data from file name 
+  bs_meta = unlist(str_split(file_list_bs[i], pattern = "_"))
+  
+  #meta data from file names
+  replicate = bs_meta[1]
+  temp = bs_meta[3]
+  
+  #gets the average length for this replicate & temp combination
+ rep_avg_length = mean(length_data$length)
+ 
+ naup_resp_data = naup_resp_data %>%
+   mutate ("avg_length_mm" = rep_avg_length) 
+ 
+ 
+ # Below are various unit manipulations to transform length data (in mm) to um as necesary for dry weight calculation
+ naup_resp_data$avg_length_um = (naup_resp_data$avg_length_mm)*1000
+  
+
+#length - ng C conversion from berggren et al 1988 (food size spectra)
+naup_resp_data$weight_ngC_B88 = 3.18 * 10^-6 * naup_resp_data$avg_length_um^3.31
+  
+
+
+naup_resp_data$weight_c_kg_B88 = (naup_resp_data$weight_ngC_B88) / 1000000000000
+ 
+ #divides resp_rate for each vial by 15, which is the number of nauplii in each vial. This transforms resp measurements into individuals, instead of bulk measurements
+ naup_resp_data$resp_rate_corr = (naup_resp_data$resp_rate)/ 15
+ 
+  #Inputs should be in % Air. Sat, minutes, kilograms, liters
+  #Output is mL Oxygen per hour per microgram dry weight
+  mass_conv_B88 = convert_rate(naup_resp_data$resp_rate_corr,
+                           oxy.unit = "%Oxy",
+                           time.unit = "m",
+                           output.unit = "mL/h/mg",
+                           mass = naup_resp_data$weight_c_kg_B88,
+                           volume = 0.0028,
+                           S = O2_adj$`Salinity [g/1000g]`[1],
+                           t = mean(O2_adj$`Tm [°C]`),
+                           P = (O2_adj$`p [mbar]`[1]/1000))
+  
+  #Inputs should be in % Air. Sat, minutes, kilograms, liters
+  #Output is mL Oxygen per hour per microgram dry weight
+  resp_conv = convert_rate(naup_resp_data$resp_rate_corr,
+                           oxy.unit = "%Oxy",
+                           time.unit = "m",
+                           output.unit = "mL/h",
+                           mass = NULL,
+                           volume = 0.0028,
+                           S = O2_adj$`Salinity [g/1000g]`[1],
+                           t = mean(O2_adj$`Tm [°C]`),
+                           P = (O2_adj$`p [mbar]`[1]/1000))
+  
+  
+  
+ 
+  
+  
+  naup_resp_data$resp_mL_h = resp_conv$rate.output
+  
+  naup_resp_data$msr_B88 = mass_conv_B88$rate.output
+  
+  naup_resp_rates = bind_rows(naup_resp_rates, naup_resp_data)
+    
+  naup_bg_resp_rates = bind_rows(naup_bg_resp_rates, bg_resp_data)
+  
+  
+  O2_adj$rep = i
+  naup_o2_record = bind_rows(naup_o2_record, O2_adj)
+  
+
+} #end of I (individual file) loop
+
+
+naup_resp_rates$resp_rate = naup_resp_rates$resp_rate * -1
+
+
+
+naup_resp_rates$msr_B88 = naup_resp_rates$msr_B88 * -1
+
+```
+
+
+
+# Figures
+
+```{r Fig1, include=TRUE, fig.width=8, fig.height=8}
+
+
+surv_data = read_excel(path = "Data/Nauplii/Survivorship/July_nauplii_survivorship.xlsx")
+
+tolerance = surv_data %>% 
+  group_by(population, dev_temp) %>% #Breaks data down into experimental groups (populations, collections, dev. temps)
+  group_modify(~ data.frame( #For each of these groups, store these values in a data frame
+    "LD50" = unclass( #Use a glm to estimate TPCs and then use those TPCs to estimate LD50
+      dose.p(p = 0.5, 
+             glm(data = .x, survivorship ~ stress_temp, family = binomial(link = "logit")))),
+    "SE" = attr( #What is the SE of the LD50 estimate
+      dose.p(p = 0.5,
+             glm(data = .x, survivorship ~ stress_temp, family=binomial(link = "logit"))), 
+      "SE")))
+
+ggplot(surv_data, aes(x = stress_temp, y = survivorship)) +
+  geom_segment(aes(x=18, xend=tolerance$LD50, y=0.5, yend=0.5)) +
+  geom_segment(aes(x=tolerance$LD50, xend=tolerance$LD50, y=0, yend=0.5)) +
+ # geom_hline(yintercept = 0.5, size = 1, colour = "gray80") + 
+ # geom_vline(xintercept = tolerance$LD50) + 
+  geom_point(position=position_jitter(width=0.2, height=0.02), 
+             size=2, alpha = 0.5, colour = "black") + 
+  geom_smooth(method = "glm", se=T, method.args = list(family = "binomial"), size = 1.2, colour = "black") + 
+  scale_y_continuous(breaks = c(0, 0.5, 1)) + 
+  xlab("Stress Temperature (degrees C)") +
+  ylab("Individual Survivorship") +  
+  theme_pubr(base_size = 15) +
+  annotate("text", x=25, y=0.57,
+           label = "LD50 = 32.0 degrees C", 
+           col = "black", 
+           size = 8)
+```
+
+
+```{r Fig2, include=TRUE}
+
+data_tidyd = o2_record %>% 
+  pivot_longer(cols = starts_with(c("Test - A", "Test - B", "Test - C", "Test - D", "Control - A", "Control - B", "Control - C", "Control - D")),
+               names_to = c("vial"),
+               values_to = "O2") %>%  
+  mutate("treatment" = if_else(str_detect(vial, "Control"), "Control", "Copepod"),                       
+         vial = str_extract(vial, "[:alpha:][:digit:]"),
+         "vial_id" = paste(vial, rep, sep = "_")) %>% 
+  group_by(vial_id) %>% 
+  arrange(`Time/Min.`) %>% 
+  mutate("scaled_O2" = O2 / first(O2)) %>% 
+  drop_na(scaled_O2)%>%
+  ungroup()%>%
+  mutate("label"=paste("Day", rep, sep = " "),
+         "label"=fct_reorder(label,rep,min))
+
+#Creates drawdown figure of a single experimental day
+data_tidyd %>%
+  filter(day_id == "R1_3_24")%>%
+ggplot(aes(x = `Time/Min.`, y = scaled_O2, colour = treatment, group = vial)) +
+  #facet_wrap(.~day_id, scales = "free_x") + 
+  scale_color_manual(values = group_color_vector1) + 
+  labs(
+    x= "Time (min.)",
+    y="Scaled Oxygen (% intitial saturation)", 
+    colour = "Vial Type"
+  ) +
+  geom_point(size = 1) + 
+  #theme_bw(base_size = 30) + 
+  theme(panel.grid = element_blank())+
+  geom_smooth(method = "lm") +
+ # theme_mat() 
+  theme_bw(base_size = 30, base_family="serif")+
+  theme(panel.grid = element_blank(),
+    axis.line.x.bottom = element_line(color = 'black'),
+    axis.line.y.left   = element_line(color = 'black'),
+    axis.line.y.right  = element_blank(),
+    axis.text.y.right  = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    panel.border       = element_blank(),
+    )
+
+
+```
+
+
+```{r Fig3}
+
+ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = temp))+
+  geom_boxplot(outlier.size = 0.0, outlier.shape=NA) +
+  geom_point(position = position_dodge(width=0.75)) +
+  labs(
+    x = "Temperature (C)", 
+    y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg Carbon)",
+    fill = "Temperature"
+  )+
+   scale_fill_manual(labels = c("18", "28"), values = c("lightskyblue", "tomato2"))+
+ # theme_mat()+
+  theme_bw(base_size = 17, base_family="serif")+
+theme(panel.grid = element_blank(),
+    axis.line.x.bottom = element_line(color = 'black'),
+    axis.line.y.left   = element_line(color = 'black'),
+    axis.line.y.right  = element_blank(),
+    axis.text.y.right  = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    panel.border       = element_blank(),
+    legend.position = "none"
+    )
+
+
+
+```
+
+
+
+```{r Fig4, include=TRUE, fig.width=13, fig.height=8}
+
+axis_weights = c(400, 600, 800)
+break_weights = (axis_weights^2.92 * (1.11*10^-5))
+
+
+full_dataset %>% filter(group == "active")%>% drop_na(sex)%>% 
+  mutate(
+    new_sex = ifelse(sex %in% c("man", "Male", "M", "MALE"), "Male", "Female") 
+  ) %>%
+  ggplot(aes(x=stage, y=length_um, fill=treatment)) + 
+  facet_grid(.~new_sex) +
+  geom_boxplot(lwd=0.25, outlier.shape=NA) +
+  geom_point(position = position_dodge(width=0.75), size=0.65) +
+  
+  #scale_y_continuous(name="Body Length (mm)", sec.axis=sec_axis(((~.1^2.92 * (1.11*10^-5)), name= "test axis")) +
+                       
+  scale_y_continuous(sec.axis=sec_axis(~.^2.92 * (1.11*10^-5), name = "Mass (ng C)", breaks = round(break_weights, digits=0))) +                     
+                       
+  #scale_y_continuous(name="Body Length (mm)", sec.axis=sec_axis(~.* 575439937 * 0.0000111, name= "test axis")) +
+  #theme_mat() +
+ # scale_fill_manual(values = treatment_color_vector)+ 
+   scale_fill_manual(labels = c("Control", "Heat Stress"), values = c("lightskyblue", "tomato2")) +
+  labs( x = "Copepodite Stage", 
+    y = "Body Length (um)",
+    fill = "Experimental Group") +
+  theme_bw(base_size = 21, base_family="arial") +
+  theme(panel.grid = element_blank())
+
+
+
+```
+
+
+```{r Fig5, include=TRUE, fig.width = 13, fig.height=8 }
+#Creates combined per capita and mass-specific respiration plot
+
+plot_data = full_dataset %>% 
+  filter(mass_spec_resp >= 0, group == "active")
+
+panel_labs = c("(a)", "(b)")
+
+#Per capita respiration plot
+resp_plot = ggplot(plot_data, aes(x = stage, y = resp_mL_h, fill = treatment, colour = treatment)) + 
+  geom_hline(yintercept = 0, size = 1) + 
+  #geom_point(position = position_dodge(width = 0.5), size = 2) + 
+  geom_boxplot(colour = "black", outlier.shape=NA) +
+  geom_point(position = position_dodge(width=0.75),color = "black", size=0.85) + 
+  theme_mat(base_size = 10) +
+ # scale_fill_manual(values = treatment_color_vector)+ 
+  scale_fill_manual(labels = c("Control", "Heat Stress"), values = c("lightskyblue", "tomato2")) +
+  labs(
+    x = "Copepodite Stage",
+    y = "Respiration \n (mL Oxygen/hour/individual)",
+    fill = "Experimental Group",
+    tag = "(A)"
+  ) +
+  theme(text = element_text(size = 20,
+        family = "arial")) 
+
+#Mass-specific respiration plot
+mass_spec_plot = ggplot(plot_data, aes(x = stage, y = mass_spec_resp, fill = treatment, colour = treatment)) + 
+  geom_hline(yintercept = 0, size = 1) + 
+  #geom_point(position = position_dodge(width = 0.5), size = 2) + 
+  geom_boxplot(colour = "black",outlier.shape=NA) +
+  geom_point(position = position_dodge(width = 0.75), color = "black", size = 0.85) + 
+  theme_mat(base_size=10) + 
+  scale_fill_manual(values = treatment_color_vector)+ 
+  labs(
+    x = "Copepodite Stage", 
+    y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg C)",
+    fill = "Experimental Group",
+    tag = "(B)"
+  ) +
+  theme(text = element_text(size = 20,
+                            family="arial"))
+
+#Combining the two plots into one figure
+ggarrange(resp_plot, mass_spec_plot, nrow = 1, common.legend = T) 
+
+```
+
+
+```{r Fig6, include=TRUE}
+
+#Reads in survival data 
+
+surv_data = read_xlsx("Data/survival_test_corr.xlsx")%>%
+  filter(group == "active")
+
+#Kaplan-Meier Analysis or survival, uses survminer package
+
+km_combined = survfit(Surv(death_day, status) ~ treatment, data = surv_data)
+
+summary(km_combined, times = c(1:16))
+
+ggsurvplot(
+  fit = survfit(Surv(death_day, status) ~ treatment, data = surv_data),
+  xlab = "Days", 
+  ylab = "Survival %", 
+  title = "Kaplan-Meier Proportional Survival Estimates",
+  palette = c("lightskyblue", "tomato2"),
+  conf.int = TRUE, 
+  pval = FALSE,
+  ggtheme = theme_bw(base_size = 15, base_family="serif")+
+  theme(panel.grid = element_blank(),
+    axis.line.x.bottom = element_line(color = 'black'),
+    axis.line.y.left   = element_line(color = 'black'),
+    axis.line.y.right  = element_blank(),
+    axis.text.y.right  = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    panel.border       = element_blank(),
+    legend.position = "none"
+    ))
+
+```
+
+
+```{r Fig7, include = TRUE}
+
+cox_model <- coxph(Surv(death_day, status) ~ treatment + replicate, data = surv_data)
+
+summary(cox_model)
+
+ggforest(cox_model, data = surv_data)
+
+```
+
+
+```{r Fig8, include=TRUE}
+
+dev_time_data = molt_record %>% filter(stage %in% c("c1","c6"))%>%
+  group_by(id, stage)%>%
+  filter(date == min(date), group == "active")%>%
+  ungroup(stage)%>%
+  mutate("dev_time" = lead(days) - days)%>%
+  drop_na("dev_time", "sex") %>%
+  dplyr::select(-stage,-days) %>%
+  separate(id, c("replicate", "id_original"), sep = "_", remove=F) %>%
+  mutate(
+    new_sex = ifelse(sex %in% c("man", "Male", "M", "MALE"), "Male", "Female") 
+  ) 
+
+xlabs = c("Control", "Heat Stress")
+
+
+ggplot(dev_time_data, aes(x=treatment, y=dev_time, fill=treatment)) +
+  geom_boxplot(outlier.shape=NA) + 
+  #geom_point(position=position_dodge(width=0.75), size=3) +
+  geom_point(position=position_jitter(width=0.10, height=0.00), size = 1) +
+  facet_grid(.~new_sex) +
+ # theme_mat()+
+   #scale_fill_manual(values = treatment_color_vector)+ 
+  scale_fill_manual(labels = c("Control", "Heat Stress"), values = c("lightskyblue", "tomato2")) +
+  labs(
+    x = "Treatment",
+    y = "Total Development Time from C1-C6 (days)",
+    fill = "Experimental Group") +
+    theme_bw(base_size = 15, base_family="arial") +
+  theme(panel.grid = element_blank(),
+    axis.line.x.bottom = element_line(color = 'black'),
+    axis.line.y.left   = element_line(color = 'black'),
+    axis.line.y.right  = element_blank(),
+    axis.text.y.right  = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    panel.border       = element_blank(),
+    legend.position = "none"
+    )+
+  scale_x_discrete(labels = xlabs)
+
+```
+
+
+```{r Fig9, include=TRUE}
+
+full_dataset$msr_nl = full_dataset$mass_spec_resp * 1000000 
+full_dataset$weight_mgC = full_dataset$weight_ngC / 1000000
+
+
+
+thesisdata= full_dataset %>%
+  filter(mass_spec_resp > 0)
+ 
+
+
+
+ 
+
+df1 = full_dataset %>%
+  filter(mass_spec_resp > 0, weight_mgC>0) 
+  
+
+  ggplot(aes(x= weight_mgC, y=mass_spec_resp), data=df1)+
+    labs(
+      x = "Mass (mg Carbon)",
+      y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg Carbon)"
+      #title = "Mass-Specific Respiration vs. Weight"
+    ) +
+    geom_point()+
+   
+    scale_x_log10()+
+    scale_y_log10() +
+     geom_smooth(method = "lm", formula = (y~x)) +
+  
+   
+    #theme_bw(base_size=15)
+    theme_bw(base_size = 17, base_family="serif") +
+  theme(panel.grid = element_blank(),
+    axis.line.x.bottom = element_line(color = 'black'),
+    axis.line.y.left   = element_line(color = 'black'),
+    axis.line.y.right  = element_blank(),
+    axis.text.y.right  = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    panel.border       = element_blank(),
+    legend.position = "none"
+    )
+    
+  
+full_dataset$resp_nl_min_ind = (full_dataset$resp_mL_h * (1*10^6) ) / 60
+full_dataset$weight_mg = full_dataset$weight_ngC * (1*10^-6)
+
+```
+
+# Statistical Tests 
+
+```{r Mass-specific Resp vs Weight Model Tests}
+
+log.model = lm(log(mass_spec_resp) ~ log(weight_mgC), data=full_dataset) 
+summary(log.model)
+coef(log.model)
+summary(log.model)$r.squared
+car::Anova(log.model)
+
+linear.model =  lm(msr_nl ~ weight_ngC, data=full_dataset)
+summary(linear.model)
+coef(linear.model)
+summary(linear.model)$r.squared
+
+exp.model= lm(log(msr_nl) ~ weight_ngC, data=full_dataset) 
+summary(exp.model)
+coef(exp.model)
+summary(exp.model)$r.squared
+
+AIC(log.model, linear.model, exp.model)
+
+```
+
+```{r Mass-specific Resp LME ANOVA, include=TRUE}
+#stage_mass_spec_resp.model = lme4::lmer(mass_spec_resp ~ stage + sex + treatment + (1|replicate/id), 
+#                                        data = plot_data)
+#car::Anova(stage_mass_spec_resp.model, test="F")
+#summary(stage_mass_spec_resp.model)
+
+
+#RUN THIS LINE BEFORE MODEL
+options(contrasts=c("contr.sum","contr.poly"))
+
+#log transformation or mass_spec_resp data
+plot_data$log_mass_spec_resp = log(plot_data$mass_spec_resp)
+
+#lme4 model of msr interactions w/ stage, sex, and treatment. random effects of exp. replicate and indiv. ID
+msr.model = lme4::lmer(log_mass_spec_resp ~ stage * sex * treatment + (1|replicate/id), 
+                                        data = plot_data)
+
+#ANOVA must be type 3 (if using "small a" anova: type m)
+car::Anova(msr.model, test="F", type = 3)
+
+#summary(int_stage_mass_spec_resp.model)
+
+#Residual plot of msr
+plot(msr.model)
+
+#Storage of residual output of msr model
+msr.model_res = resid(msr.model, type = "pearson")
+
+qqnorm(msr.model_res);qqline(msr.model_res, colour = "red")
+#log transform data to acount for non-normality of variance 
+
+
+#Additions from Catherine 
+
+
+
+
+```
+
+
+```{r Body Length LME ANOVA, include=TRUE}
+#stage_size.model = lme4::lmer(body_length ~ stage + sex + treatment + (1|replicate/id),
+#                             data = plot_data)
+#car::Anova(stage_size.model, test="F")
+#summary(stage_size.model)
+
+#Log transformation of body length data
+plot_data$log_body_length = log(plot_data$body_length)
+
+#lme4 model of body size interaction with stage, sex, and treatment. random effects of exp. replicate and indiv. ID
+bl.model = lme4::lmer(log_body_length ~ stage * sex * treatment + (1|replicate/id),
+                              data = plot_data)
+
+car::Anova(bl.model, test="F", type = 3)
+
+plot(bl.model)
+
+bl.model_res = resid(bl.model, type = "pearson")
+
+qqnorm(bl.model_res);qqline(bl.model_res)
+#log transform data to acount for non-normality of variance 
+
+
+
+
+```
+
+```{r Dev Time LME ANOVA, include=TRUE}
+
+dev_time_data$log_dev_time = log(dev_time_data$dev_time)
+
+
+
+dt.model = lme4::lmer(log_dev_time ~ sex * treatment + (1|replicate),
+                            data = dev_time_data)
+                              
+
+plot(dt.model)
+
+dt.model_res = resid(dt.model, type = "pearson")
+
+qqnorm(dt.model_res);qqline(dt.model_res)
+#log transform data to acount for non-normality of variance 
+```
+
+
+```{r Body Length Post Hoc Test, include=TRUE}
+stage_size.model = lme4::lmer(body_length ~ stage + sex + treatment + stage*sex*treatment + (1|replicate/id),
+                              data = plot_data)
+
+car::Anova(stage_size.model, test="F")
+summary(stage_size.model)
+
+emmeans(stage_size.model,  pairwise ~ stage : sex )
+
+```
+
+# Handling Control Statistical Tests
+
+```{r Handling Comparison Data Frame, include=TRUE}
+c6_handling_anova = full_dataset %>%
+  filter(stage == "c6")
+```
+
+```{r Mass-specific Resp Hangling Comparison, include=TRUE}
+handling_resp = aov(mass_spec_resp ~ treatment*group*sex, data = c6_handling_anova)
+
+summary(handling_resp)
+```
+
+```{r Body Length Handling Comparison, include=TRUE}
+handling_body_length = aov(body_length ~ treatment*group*sex, data = c6_handling_anova)
+
+summary(handling_body_length)
+```
+
+```{r Dev Time Handling Comparison, include=TRUE}
+
+dev_time_data = molt_record %>% filter(stage %in% c("c1","c6"))%>%
+  group_by(id, stage)%>%
+  filter(date == min(date))%>%
+  ungroup(stage)%>%
+  mutate("dev_time" = lead(days) - days)%>%
+  drop_na("dev_time", "sex") %>%
+  dplyr::select(-stage,-days) %>%
+  separate(id, c("replicate", "id_original"), sep = "_", remove=F)
+
+handling_dev_time = aov(dev_time ~ treatment*group*sex, data = dev_time_data)
+
+summary(handling_dev_time)
+```
+
+
+
+
+
+```{r output chunk, include=FALSE}
+
+write.csv(plot_data,"Output/Data/plot_data.csv", row.names = F )
+
+write.csv(dev_time_data,"Output/Data/dev_time_data.csv", row.names = F )
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
