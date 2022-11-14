@@ -103,7 +103,7 @@ for(i in 1:length(file_list_resp)){
   Oxygen_Data = read_excel(path = paste("Data/Respiration", file_list_resp[i], sep = "/"))
   
   #Puts Oxygen excel file into DPLYR format
-  Oxygen_Data = as.tibble(Oxygen_Data)
+  Oxygen_Data = as_tibble(Oxygen_Data)
   
    #Removes acclimation time, only looks at >300 min portion of runs
   Oxygen_Data_acc = Oxygen_Data[Oxygen_Data$`Time/Min.` > 350 ,]
@@ -281,7 +281,7 @@ for(i in 1:length(file_list_resp)){
   Oxygen_Data = read_excel(path = paste("Data/Nauplii/Respiration", file_list_resp[i], sep = "/"))
   
   #Puts Oxygen excel file into DPLYR format
-  Oxygen_Data = as.tibble(Oxygen_Data)
+  Oxygen_Data = as_tibble(Oxygen_Data)
   
    #Removes acclimation time, only looks at >300 min portion of runs
   Oxygen_Data_acc = Oxygen_Data[Oxygen_Data$`Time/Min.` > 350 ,]
