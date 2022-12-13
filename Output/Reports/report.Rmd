@@ -310,6 +310,22 @@ ggplot(aes(x= weight_mgC, y=mass_spec_resp), data=df1)+
 
 full_dataset$resp_nl_min_ind = (full_dataset$resp_mL_h * (1*10^6) ) / 60
 full_dataset$weight_mg = full_dataset$weight_ngC * (1*10^-6)
+
+
+ind_slopes = df1 %>% 
+  group_by(id, treatment, sex, replicate) %>% 
+  summarise(slope = coef(lm(log10(mass_spec_resp) ~ log10(weight_mgC)))[2],
+            n = n()) %>% 
+  drop_na() %>% 
+  filter(n == 6) 
+
+ind_slopes %>%  #Summarizes the individual slopes; copepods that had respiration measured at all 6 stages 
+  ungroup() %>% 
+  summarise(n = n(),
+            mean = mean(slope),
+            se = sd(slope)/sqrt(n()),
+            range = paste(round(range(slope)[1], digits = 2), "to", round(range(slope)[2], digits = 2), sep = " ")) %>% 
+  kable(align = "c")
 ```
 
 
