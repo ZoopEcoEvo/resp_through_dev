@@ -315,7 +315,7 @@ full_dataset$weight_mg = full_dataset$weight_ngC * (1*10^-6)
 
 # Tables    
 ## Table 1    
-```{r Table1, include=FALSE}
+```{r Table1, include=T}
 #Remove individuals that didnt make it to C6
 plot_data = plot_data %>%
   drop_na(sex)
@@ -357,7 +357,7 @@ car::Anova(msr_m.6, test="F", type = 3)
 ```
 
 ## Table 2    
-```{r Table2, include=FALSE}
+```{r Table2, include=T}
 #Recreate plot_data df
 plot_data = full_dataset %>% 
   filter(mass_spec_resp >= 0, group == "active")
@@ -396,7 +396,7 @@ summary(bl_m.6)
 ```
 
 ## Table 3    
-```{r Table3, include=FALSE}
+```{r Table3, include=T}
 #RUN THESE OPTIONS BEFORE MODELS
 options(contrasts=c("contr.sum","contr.poly"))
 
@@ -493,13 +493,13 @@ S_Fig3
 ```
 
 ## Supp. Table 1    
-```{r S_Table1, include=FALSE}
+```{r S_Table1, include=T}
 #Emmeans post-hoc analysis of selected body length model
 kable(emmeans::emmeans(bl_m.6,  pairwise ~ stage : sex )$emmeans)
 ```
 
 ## Supp. Table 2    
-```{r S_Table2, include=FALSE}
+```{r S_Table2, include=T}
 c6_handling_anova = full_dataset %>%
   filter(stage == "c6")
 #Comparison of C6 mass-spec resp between actively handled and handling controls
@@ -523,7 +523,7 @@ kable(anova(msrh_m.4))
 ```
 
 ## Supp. Table 3    
-```{r S_Table3, include=FALSE}
+```{r S_Table3, include=T}
 #Comparison of C6 body lengths between actively handled and handling controls
 blh_m0 <- lme(body_length ~ group * sex* treatment, random = ~1|replicate/id,data = c6_handling_anova)
 blh_m.1 <- update(blh_m0, weights = varIdent(form = ~1|stage))
@@ -540,7 +540,7 @@ kable(car::Anova(blh_m0, Test="F", type = 3))
 ```
 
 ## Supp. Table 4    
-```{r S_Table4, include=FALSE}
+```{r S_Table4, include=T}
 #Comparison of copepodid dev time between actively handled and handling controls 
 
 #Remake dev time data df
