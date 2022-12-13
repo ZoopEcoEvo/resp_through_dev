@@ -417,156 +417,30 @@ msr_m.6 <- update(msr_m0, weights = varIdent(form = ~1|stage*treatment))
 msr_m.7 <- update(msr_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
 #Comparison of models
-anova(msr_m0,msr_m.1, msr_m.2, msr_m.3, msr_m.4, msr_m.5, msr_m.6, msr_m.7)
-##         Model df        AIC       BIC    logLik   Test   L.Ratio p-value
-## msr_m0      1 27    0.40099  86.90917  26.79950                         
-## msr_m.1     2 32 -125.67174 -23.14353  94.83587 1 vs 2 136.07274  <.0001
-## msr_m.2     3 28    2.36043  92.07261  26.81979 2 vs 3 136.03217  <.0001
-## msr_m.3     4 28    2.28492  91.99710  26.85754                         
-## msr_m.4     5 38 -123.37788  -1.62562  99.68894 4 vs 5 145.66279  <.0001
-## msr_m.5     6 30    6.00905 102.12925  26.99547 5 vs 6 145.38693  <.0001
-## msr_m.6     7 38 -128.62134  -6.86908 102.31067 6 vs 7 150.63039  <.0001
-## msr_m.7     8 50 -114.22017  45.98016 107.11009 7 vs 8   9.59883  0.6511
+#anova(msr_m0,msr_m.1, msr_m.2, msr_m.3, msr_m.4, msr_m.5, msr_m.6, msr_m.7)
 
 #Residual plot
-plot(msr_m.6)
-```
-
-<img src="../Output/Figures/Markdown/Table1-1.png" style="display: block; margin: auto auto auto 0;" />
-
-``` r
-m.6.e <- resid(msr_m.6, type = 'pearson')
+#plot(msr_m.6)
+#m.6.e <- resid(msr_m.6, type = 'pearson')
 
 #Q-Q plot
-qqnorm(m.6.e); qqline(m.6.e, col = 2)
-```
-
-<img src="../Output/Figures/Markdown/Table1-2.png" style="display: block; margin: auto auto auto 0;" />
-
-``` r
+#qqnorm(m.6.e); qqline(m.6.e, col = 2)
 
 #Summary and stats of selected model
-summary(msr_m.6)
-## Linear mixed-effects model fit by REML
-##   Data: plot_data 
-##         AIC       BIC   logLik
-##   -128.6213 -6.869083 102.3107
-## 
-## Random effects:
-##  Formula: ~1 | replicate
-##         (Intercept)
-## StdDev:   0.0121658
-## 
-##  Formula: ~1 | id %in% replicate
-##         (Intercept)  Residual
-## StdDev:   0.0120096 0.3844564
-## 
-## Variance function:
-##  Structure: Different standard deviations per stratum
-##  Formula: ~1 | stage * treatment 
-##  Parameter estimates:
-## c1*heatstress c2*heatstress c3*heatstress c4*heatstress c5*heatstress c6*heatstress    c1*control    c3*control    c5*control    c6*control    c2*control    c4*control 
-##    1.00000000    0.61855412    0.32225798    0.21949748    0.18219987    0.10992402    0.72554318    0.23310489    0.12878768    0.07646048    0.54565561    0.49423276 
-## Fixed effects:  mass_spec_resp ~ stage * sex * treatment 
-##                              Value  Std.Error  DF   t-value p-value
-## (Intercept)             0.24757438 0.01852334 145 13.365539  0.0000
-## stage1                  0.21836065 0.05653471 145  3.862418  0.0002
-## stage2                  0.06239019 0.05406047 145  1.154081  0.2504
-## stage3                 -0.02022291 0.02468009 145 -0.819402  0.4139
-## stage4                 -0.04459256 0.03523830 145 -1.265457  0.2077
-## stage5                 -0.09887333 0.01917217 145 -5.157127  0.0000
-## sex1                    0.02785695 0.01717608  35  1.621846  0.1138
-## treatment1             -0.00621445 0.01711646  35 -0.363069  0.7187
-## stage1:sex1             0.03266264 0.05653539 145  0.577738  0.5643
-## stage2:sex1             0.03579632 0.05405814 145  0.662182  0.5089
-## stage3:sex1            -0.01860476 0.02467214 145 -0.754079  0.4520
-## stage4:sex1             0.02052494 0.03523266 145  0.582554  0.5611
-## stage5:sex1            -0.03075944 0.01917157 145 -1.604430  0.1108
-## stage1:treatment1       0.01972841 0.05653467 145  0.348961  0.7276
-## stage2:treatment1       0.00486570 0.05405781 145  0.090009  0.9284
-## stage3:treatment1       0.00251669 0.02466849 145  0.102020  0.9189
-## stage4:treatment1      -0.01754152 0.03523404 145 -0.497857  0.6193
-## stage5:treatment1      -0.00511196 0.01917676 145 -0.266570  0.7902
-## sex1:treatment1         0.01708426 0.01712007  35  0.997908  0.3252
-## stage1:sex1:treatment1  0.01136705 0.05653700 145  0.201055  0.8409
-## stage2:sex1:treatment1  0.01947190 0.05406418 145  0.360163  0.7192
-## stage3:sex1:treatment1  0.01199249 0.02467206 145  0.486076  0.6276
-## stage4:sex1:treatment1 -0.00187171 0.03523574 145 -0.053120  0.9577
-## stage5:sex1:treatment1 -0.01258740 0.01918143 145 -0.656229  0.5127
-##  Correlation: 
-##                        (Intr) stage1 stage2 stage3 stage4 stage5 sex1   trtmn1 stg1:s1 stg2:s1 stg3:s1 stg4:s1 stg5:s1 stg1:t1 stg2:t1 stg3:t1 stg4:t1 stg5:t1 sx1:t1 s1:1:1
-## stage1                  0.419                                                                                                                                               
-## stage2                  0.369 -0.359                                                                                                                                        
-## stage3                 -0.457 -0.371 -0.339                                                                                                                                 
-## stage4                 -0.075 -0.340 -0.319 -0.035                                                                                                                          
-## stage5                 -0.757 -0.423 -0.376  0.399  0.044                                                                                                                   
-## sex1                   -0.464 -0.049 -0.337  0.248 -0.041  0.417                                                                                                            
-## treatment1              0.148 -0.282  0.307 -0.143  0.249 -0.160 -0.380                                                                                                     
-## stage1:sex1            -0.045 -0.285  0.165  0.062  0.108  0.051  0.451 -0.008                                                                                              
-## stage2:sex1            -0.312  0.165 -0.675  0.266  0.251  0.309  0.400 -0.304 -0.359                                                                                       
-## stage3:sex1             0.229  0.062  0.266 -0.504  0.074 -0.205 -0.494  0.250 -0.371  -0.339                                                                               
-## stage4:sex1            -0.037  0.108  0.251  0.074 -0.658  0.046 -0.082 -0.067 -0.340  -0.319  -0.035                                                                       
-## stage5:sex1             0.386  0.051  0.309 -0.205  0.046 -0.476 -0.816  0.341 -0.423  -0.376   0.400   0.044                                                               
-## stage1:treatment1      -0.261 -0.269 -0.019  0.205  0.038  0.257 -0.008  0.453 -0.183   0.131   0.009   0.080   0.006                                                       
-## stage2:treatment1       0.284 -0.019  0.469 -0.205 -0.251 -0.269 -0.303  0.400  0.131  -0.574   0.216   0.226   0.270  -0.359                                               
-## stage3:treatment1      -0.131  0.205 -0.205 -0.010 -0.157  0.140  0.249 -0.495  0.009   0.216  -0.218   0.052  -0.226  -0.371  -0.338                                       
-## stage4:treatment1       0.230  0.038 -0.252 -0.157  0.670 -0.214 -0.067 -0.082  0.080   0.226   0.052  -0.574   0.058  -0.340  -0.319  -0.035                               
-## stage5:treatment1      -0.149  0.257 -0.269  0.140 -0.214  0.063  0.341 -0.819  0.006   0.270  -0.226   0.058  -0.290  -0.423  -0.376   0.399   0.044                       
-## sex1:treatment1        -0.351 -0.008 -0.303  0.249 -0.067  0.341  0.158 -0.500 -0.282   0.307  -0.142   0.248  -0.160  -0.049  -0.337   0.248  -0.040   0.417               
-## stage1:sex1:treatment1 -0.008 -0.183  0.131  0.009  0.079  0.006 -0.280 -0.049 -0.269  -0.019   0.205   0.038   0.257  -0.285   0.165   0.062   0.108   0.051   0.453       
-## stage2:sex1:treatment1 -0.281  0.131 -0.574  0.216  0.225  0.270  0.308 -0.338 -0.019   0.469  -0.205  -0.251  -0.269   0.165  -0.675   0.265   0.251   0.309   0.399 -0.359
-## stage3:sex1:treatment1  0.230  0.009  0.216 -0.218  0.052 -0.226 -0.141  0.248  0.205  -0.204  -0.010  -0.157   0.140   0.062   0.265  -0.504   0.074  -0.204  -0.494 -0.371
-## stage4:sex1:treatment1 -0.061  0.080  0.226  0.052 -0.574  0.058  0.247 -0.040  0.038  -0.252  -0.157   0.670  -0.213   0.108   0.251   0.074  -0.657   0.046  -0.082 -0.340
-## stage5:sex1:treatment1  0.316  0.006  0.270 -0.227  0.059 -0.290 -0.162  0.418  0.257  -0.269   0.140  -0.213   0.063   0.050   0.309  -0.205   0.047  -0.476  -0.818 -0.423
-##                        s2:1:1 s3:1:1 s4:1:1
-## stage1                                     
-## stage2                                     
-## stage3                                     
-## stage4                                     
-## stage5                                     
-## sex1                                       
-## treatment1                                 
-## stage1:sex1                                
-## stage2:sex1                                
-## stage3:sex1                                
-## stage4:sex1                                
-## stage5:sex1                                
-## stage1:treatment1                          
-## stage2:treatment1                          
-## stage3:treatment1                          
-## stage4:treatment1                          
-## stage5:treatment1                          
-## sex1:treatment1                            
-## stage1:sex1:treatment1                     
-## stage2:sex1:treatment1                     
-## stage3:sex1:treatment1 -0.338              
-## stage4:sex1:treatment1 -0.319 -0.035       
-## stage5:sex1:treatment1 -0.377  0.399  0.045
-## 
-## Standardized Within-Group Residuals:
-##        Min         Q1        Med         Q3        Max 
-## -1.9775118 -0.6479468 -0.1256998  0.6192597  3.1207480 
-## 
-## Number of Observations: 206
-## Number of Groups: 
-##         replicate id %in% replicate 
-##                 3                41
-car::Anova(msr_m.6, test="F", type = 3)
-## Analysis of Deviance Table (Type III tests)
-## 
-## Response: mass_spec_resp
-##                        Chisq Df Pr(>Chisq)    
-## (Intercept)         178.6376  1  < 2.2e-16 ***
-## stage                52.0860  5   5.18e-10 ***
-## sex                   2.6304  1     0.1048    
-## treatment             0.1318  1     0.7166    
-## stage:sex             5.6654  5     0.3402    
-## stage:treatment       0.3791  5     0.9959    
-## sex:treatment         0.9958  1     0.3183    
-## stage:sex:treatment   5.0681  5     0.4076    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#summary(msr_m.6)
+kable(car::Anova(msr_m.6, test="F", type = 3))
 ```
+
+|                     |       Chisq |  Df | Pr(\>Chisq) |
+|:--------------------|------------:|----:|------------:|
+| (Intercept)         | 178.6376262 |   1 |   0.0000000 |
+| stage               |  52.0860365 |   5 |   0.0000000 |
+| sex                 |   2.6303843 |   1 |   0.1048363 |
+| treatment           |   0.1318189 |   1 |   0.7165536 |
+| stage:sex           |   5.6653731 |   5 |   0.3401526 |
+| stage:treatment     |   0.3790998 |   5 |   0.9958858 |
+| sex:treatment       |   0.9958206 |   1 |   0.3183239 |
+| stage:sex:treatment |   5.0681117 |   5 |   0.4076245 |
 
 ## Table 2
 
@@ -593,165 +467,32 @@ bl_m.6 <- update(bl_m0, weights = varIdent(form = ~1|stage*treatment))
 bl_m.7 <- update(bl_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
 #Comparison of models
-anova(bl_m0,bl_m.1, bl_m.2, bl_m.3, bl_m.4, bl_m.5, bl_m.6, bl_m.7)
-##        Model df       AIC       BIC   logLik   Test  L.Ratio p-value
-## bl_m0      1 27 -780.8143 -694.3061 417.4072                        
-## bl_m.1     2 32 -827.4476 -724.9194 445.7238 1 vs 2 56.63331  <.0001
-## bl_m.2     3 28 -786.9987 -697.2865 421.4993 2 vs 3 48.44894  <.0001
-## bl_m.3     4 28 -792.6446 -702.9324 424.3223                        
-## bl_m.4     5 38 -831.8938 -710.1415 453.9469 4 vs 5 59.24918  <.0001
-## bl_m.5     6 30 -793.3551 -697.2349 426.6775 5 vs 6 54.53874  <.0001
-## bl_m.6     7 38 -831.9178 -710.1655 453.9589 6 vs 7 54.56271  <.0001
-## bl_m.7     8 50 -824.3909 -664.1906 462.1955 7 vs 8 16.47314  0.1705
+#anova(bl_m0,bl_m.1, bl_m.2, bl_m.3, bl_m.4, bl_m.5, bl_m.6, bl_m.7)
 
 #Residual plot
-plot(bl_m.6)
-```
-
-<img src="../Output/Figures/Markdown/Table2-1.png" style="display: block; margin: auto auto auto 0;" />
-
-``` r
-m.6.e <- resid(bl_m.6, type = 'pearson')
+#plot(bl_m.6)
+#m.6.e <- resid(bl_m.6, type = 'pearson')
 
 #Q-Q plot
-qqnorm(m.6.e); qqline(m.6.e, col = 2)
-```
-
-<img src="../Output/Figures/Markdown/Table2-2.png" style="display: block; margin: auto auto auto 0;" />
-
-``` r
+#qqnorm(m.6.e); qqline(m.6.e, col = 2)
 
 #Summary and stats of selected model
-car::Anova(bl_m.6, test="F", type = 3)
-## Analysis of Deviance Table (Type III tests)
-## 
-## Response: body_length
-##                          Chisq Df Pr(>Chisq)    
-## (Intercept)         21092.5047  1  < 2.2e-16 ***
-## stage               11404.7802  5  < 2.2e-16 ***
-## sex                    28.1313  1  1.134e-07 ***
-## treatment               2.2741  1    0.13155    
-## stage:sex             149.0232  5  < 2.2e-16 ***
-## stage:treatment         3.5930  5    0.60936    
-## sex:treatment           2.0974  1    0.14755    
-## stage:sex:treatment     9.3014  5    0.09763 .  
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-anova(bl_m.6)
-##                     numDF denDF   F-value p-value
-## (Intercept)             1   145 20985.395  <.0001
-## stage                   5   145  4334.557  <.0001
-## sex                     1    35    12.444  0.0012
-## treatment               1    35     1.158  0.2893
-## stage:sex               5   145    45.043  <.0001
-## stage:treatment         5   145     0.312  0.9051
-## sex:treatment           1    35     0.001  0.9767
-## stage:sex:treatment     5   145     1.860  0.1048
-summary(bl_m.6)
-## Linear mixed-effects model fit by REML
-##   Data: plot_data 
-##         AIC       BIC   logLik
-##   -831.9178 -710.1655 453.9589
-## 
-## Random effects:
-##  Formula: ~1 | replicate
-##         (Intercept)
-## StdDev: 0.005642251
-## 
-##  Formula: ~1 | id %in% replicate
-##         (Intercept)   Residual
-## StdDev: 0.008226612 0.01431045
-## 
-## Variance function:
-##  Structure: Different standard deviations per stratum
-##  Formula: ~1 | stage * treatment 
-##  Parameter estimates:
-## c1*heatstress c2*heatstress c3*heatstress c4*heatstress c5*heatstress c6*heatstress    c1*control    c3*control    c5*control    c6*control    c2*control    c4*control 
-##     1.0000000     0.4880564     0.5729151     0.7499290     0.9908771     1.3178142     1.0305040     0.2946336     1.4022918     2.5713469     1.2189289     0.7415746 
-## Fixed effects:  body_length ~ stage * sex * treatment 
-##                             Value   Std.Error  DF   t-value p-value
-## (Intercept)             0.5621625 0.003870774 145 145.23259  0.0000
-## stage1                 -0.2239524 0.002768308 145 -80.89863  0.0000
-## stage2                 -0.1345053 0.004190618 145 -32.09677  0.0000
-## stage3                 -0.0574347 0.001930713 145 -29.74795  0.0000
-## stage4                  0.0312414 0.002523682 145  12.37928  0.0000
-## stage5                  0.1415393 0.002988672 145  47.35857  0.0000
-## sex1                    0.0113155 0.002133421  35   5.30390  0.0000
-## treatment1              0.0031312 0.002076389  35   1.50800  0.1405
-## stage1:sex1            -0.0175148 0.002768264 145  -6.32700  0.0000
-## stage2:sex1            -0.0222476 0.004190801 145  -5.30867  0.0000
-## stage3:sex1            -0.0101896 0.001927992 145  -5.28509  0.0000
-## stage4:sex1            -0.0029175 0.002522542 145  -1.15657  0.2494
-## stage5:sex1             0.0154651 0.002988573 145   5.17476  0.0000
-## stage1:treatment1      -0.0004573 0.002768178 145  -0.16519  0.8690
-## stage2:treatment1       0.0059118 0.004191029 145   1.41059  0.1605
-## stage3:treatment1      -0.0024269 0.001926703 145  -1.25963  0.2098
-## stage4:treatment1       0.0004997 0.002523200 145   0.19806  0.8433
-## stage5:treatment1       0.0002601 0.002990433 145   0.08697  0.9308
-## sex1:treatment1        -0.0030119 0.002079678  35  -1.44824  0.1565
-## stage1:sex1:treatment1  0.0018712 0.002768970 145   0.67579  0.5002
-## stage2:sex1:treatment1 -0.0054395 0.004193423 145  -1.29714  0.1966
-## stage3:sex1:treatment1  0.0057139 0.001927602 145   2.96424  0.0035
-## stage4:sex1:treatment1  0.0016205 0.002522369 145   0.64246  0.5216
-## stage5:sex1:treatment1 -0.0008760 0.002991357 145  -0.29284  0.7701
-##  Correlation: 
-##                        (Intr) stage1 stage2 stage3 stage4 stage5 sex1   trtmn1 stg1:s1 stg2:s1 stg3:s1 stg4:s1 stg5:s1 stg1:t1 stg2:t1 stg3:t1 stg4:t1 stg5:t1 sx1:t1 s1:1:1
-## stage1                 -0.067                                                                                                                                               
-## stage2                  0.108 -0.262                                                                                                                                        
-## stage3                 -0.255  0.119 -0.300                                                                                                                                 
-## stage4                 -0.094 -0.049 -0.211  0.129                                                                                                                          
-## stage5                 -0.052 -0.116 -0.273  0.038 -0.095                                                                                                                   
-## sex1                   -0.279  0.120 -0.233  0.290  0.070  0.102                                                                                                            
-## treatment1              0.177 -0.201  0.272 -0.353 -0.140 -0.106 -0.316                                                                                                     
-## stage1:sex1             0.067 -0.414  0.210 -0.144 -0.004  0.002 -0.125  0.096                                                                                              
-## stage2:sex1            -0.127  0.209 -0.807  0.317  0.201  0.222  0.203 -0.258 -0.263                                                                                       
-## stage3:sex1             0.155 -0.144  0.317 -0.589 -0.054 -0.073 -0.470  0.266  0.119  -0.299                                                                               
-## stage4:sex1             0.042 -0.004  0.202 -0.054 -0.614  0.037 -0.172  0.091 -0.050  -0.211   0.129                                                                       
-## stage5:sex1             0.055  0.002  0.222 -0.073  0.038 -0.472 -0.096  0.107 -0.115  -0.274   0.038  -0.094                                                               
-## stage1:treatment1      -0.107  0.174 -0.204  0.264  0.107  0.067  0.091 -0.126 -0.332   0.225  -0.134  -0.017  -0.024                                                       
-## stage2:treatment1       0.147 -0.204  0.877 -0.331 -0.207 -0.237 -0.258  0.201  0.225  -0.780   0.330   0.195   0.207  -0.262                                               
-## stage3:treatment1      -0.188  0.265 -0.330  0.281  0.167  0.142  0.259 -0.476 -0.134   0.329  -0.328  -0.093  -0.126   0.119  -0.298                                       
-## stage4:treatment1      -0.074  0.107 -0.207  0.165  0.419  0.014  0.083 -0.179 -0.017   0.195  -0.092  -0.390  -0.014  -0.049  -0.210   0.129                               
-## stage5:treatment1      -0.059  0.067 -0.237  0.144  0.013  0.416  0.113 -0.096 -0.025   0.207  -0.127  -0.013  -0.275  -0.116  -0.275   0.038  -0.095                       
-## sex1:treatment1        -0.169  0.095 -0.254  0.260  0.092  0.106  0.305 -0.507 -0.200   0.269  -0.349  -0.141  -0.104   0.124  -0.232   0.287   0.080   0.099               
-## stage1:sex1:treatment1  0.049 -0.332  0.225 -0.134 -0.018 -0.024 -0.191  0.124  0.174  -0.203   0.264   0.107   0.067  -0.414   0.209  -0.144  -0.004   0.003  -0.126       
-## stage2:sex1:treatment1 -0.139  0.225 -0.780  0.331  0.195  0.206  0.275 -0.236 -0.204   0.877  -0.331  -0.207  -0.237   0.209  -0.807   0.316   0.201   0.223   0.197 -0.261
-## stage3:sex1:treatment1  0.140 -0.134  0.329 -0.328 -0.094 -0.126 -0.339  0.288  0.264  -0.329   0.280   0.167   0.142  -0.144   0.316  -0.588  -0.055  -0.072  -0.474  0.120
-## stage4:sex1:treatment1  0.049 -0.017  0.195 -0.092 -0.389 -0.014 -0.137  0.079  0.107  -0.208   0.166   0.419   0.014  -0.004   0.202  -0.054  -0.614   0.037  -0.180 -0.050
-## stage5:sex1:treatment1  0.060 -0.024  0.207 -0.128 -0.013 -0.275 -0.113  0.102  0.068  -0.238   0.144   0.014   0.416   0.002   0.223  -0.073   0.038  -0.472  -0.092 -0.116
-##                        s2:1:1 s3:1:1 s4:1:1
-## stage1                                     
-## stage2                                     
-## stage3                                     
-## stage4                                     
-## stage5                                     
-## sex1                                       
-## treatment1                                 
-## stage1:sex1                                
-## stage2:sex1                                
-## stage3:sex1                                
-## stage4:sex1                                
-## stage5:sex1                                
-## stage1:treatment1                          
-## stage2:treatment1                          
-## stage3:treatment1                          
-## stage4:treatment1                          
-## stage5:treatment1                          
-## sex1:treatment1                            
-## stage1:sex1:treatment1                     
-## stage2:sex1:treatment1                     
-## stage3:sex1:treatment1 -0.298              
-## stage4:sex1:treatment1 -0.211  0.129       
-## stage5:sex1:treatment1 -0.275  0.037 -0.094
-## 
-## Standardized Within-Group Residuals:
-##         Min          Q1         Med          Q3         Max 
-## -2.19946643 -0.61670594 -0.04880138  0.52587488  2.53028885 
-## 
-## Number of Observations: 206
-## Number of Groups: 
-##         replicate id %in% replicate 
-##                 3                41
+kable(car::Anova(bl_m.6, test="F", type = 3))
+```
+
+|                     |        Chisq |  Df | Pr(\>Chisq) |
+|:--------------------|-------------:|----:|------------:|
+| (Intercept)         | 21092.504660 |   1 |   0.0000000 |
+| stage               | 11404.780214 |   5 |   0.0000000 |
+| sex                 |    28.131344 |   1 |   0.0000001 |
+| treatment           |     2.274059 |   1 |   0.1315550 |
+| stage:sex           |   149.023194 |   5 |   0.0000000 |
+| stage:treatment     |     3.593029 |   5 |   0.6093603 |
+| sex:treatment       |     2.097386 |   1 |   0.1475512 |
+| stage:sex:treatment |     9.301372 |   5 |   0.0976306 |
+
+``` r
+#summary(bl_m.6)
 ```
 
 ## Table 3
@@ -767,83 +508,25 @@ dt_m.2 <- update(dt_m0, weights = varIdent(form = ~1|treatment))
 dt_m.3 <- update(dt_m0, weights = varIdent(form = ~1|sex*treatment))
 
 #Comparisons of models built
-anova(dt_m0,dt_m.1, dt_m.2, dt_m.3)
-##        Model df       AIC      BIC    logLik   Test  L.Ratio p-value
-## dt_m0      1  7 137.82357 149.1000 -61.91178                        
-## dt_m.1     2  8 136.56147 149.4488 -60.28074 1 vs 2   3.2621  0.0709
-## dt_m.2     3  8 139.33924 152.2266 -61.66962                        
-## dt_m.3     4 10  20.55713  36.6663  -0.27856 3 vs 4 122.7821  <.0001
+#anova(dt_m0,dt_m.1, dt_m.2, dt_m.3)
 
 #Residual plot
-plot(dt_m.3)
-```
-
-<img src="../Output/Figures/Markdown/Table3-1.png" style="display: block; margin: auto auto auto 0;" />
-
-``` r
-m.3.e <- resid(dt_m.3, type = 'pearson')
+#plot(dt_m.3)
+#m.3.e <- resid(dt_m.3, type = 'pearson')
 #Q-Q plot
-qqnorm(m.3.e); qqline(m.3.e, col = 2)
+#qqnorm(m.3.e); qqline(m.3.e, col = 2)
+
+#Summary and stats of selected model
+#summary(dt_m.3)
+kable(car::Anova(dt_m.3, test="F", type = 3))
 ```
 
-<img src="../Output/Figures/Markdown/Table3-2.png" style="display: block; margin: auto auto auto 0;" />
-
-``` r
-
-#SUmmary and stats of selected model
-summary(dt_m.3)
-## Linear mixed-effects model fit by REML
-##   Data: dev_time_data 
-##        AIC     BIC     logLik
-##   20.55713 36.6663 -0.2785629
-## 
-## Random effects:
-##  Formula: ~1 | replicate
-##         (Intercept)
-## StdDev:   0.6253185
-## 
-##  Formula: ~1 | id %in% replicate
-##          (Intercept)  Residual
-## StdDev: 1.091205e-13 0.8789566
-## 
-## Variance function:
-##  Structure: Different standard deviations per stratum
-##  Formula: ~1 | sex * treatment 
-##  Parameter estimates:
-## F*heatstress    M*control    F*control M*heatstress 
-## 1.000000e+00 1.406344e-13 1.390899e+00 8.346209e-01 
-## Fixed effects:  dev_time ~ sex * treatment 
-##                     Value Std.Error DF   t-value p-value
-## (Intercept)      7.381271 0.3803685 35 19.405579  0.0000
-## sex1             0.428376 0.1196844 35  3.579215  0.0010
-## treatment1      -0.155342 0.1196844 35 -1.297933  0.2028
-## sex1:treatment1  0.130831 0.1196844 35  1.093137  0.2818
-##  Correlation: 
-##                 (Intr) sex1   trtmn1
-## sex1             0.104              
-## treatment1      -0.073  0.438       
-## sex1:treatment1  0.138 -0.233  0.329
-## 
-## Standardized Within-Group Residuals:
-##        Min         Q1        Med         Q3        Max 
-## -1.7327983 -0.7801948 -0.0968599  0.5829542  2.3570476 
-## 
-## Number of Observations: 41
-## Number of Groups: 
-##         replicate id %in% replicate 
-##                 3                41
-car::Anova(dt_m.3, test="F", type = 3)
-## Analysis of Deviance Table (Type III tests)
-## 
-## Response: dev_time
-##                  Chisq Df Pr(>Chisq)    
-## (Intercept)   376.5765  1  < 2.2e-16 ***
-## sex            12.8108  1  0.0003446 ***
-## treatment       1.6846  1  0.1943104    
-## sex:treatment   1.1949  1  0.2743337    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
+|               |      Chisq |  Df | Pr(\>Chisq) |
+|:--------------|-----------:|----:|------------:|
+| (Intercept)   | 376.576493 |   1 |   0.0000000 |
+| sex           |  12.810781 |   1 |   0.0003446 |
+| treatment     |   1.684630 |   1 |   0.1943104 |
+| sex:treatment |   1.194948 |   1 |   0.2743337 |
 
 # Other Statistical Tests
 
@@ -947,45 +630,21 @@ msrh_m.5 <- update(msrh_m0, weights = varIdent(form = ~1|sex*treatment))
 msrh_m.6 <- update(msrh_m0, weights = varIdent(form = ~1|stage*treatment))
 msrh_m.7 <- update(msrh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
-anova(msrh_m0,msrh_m.1, msrh_m.2, msrh_m.3, msrh_m.4, msrh_m.5, msrh_m.6, msrh_m.7)
-##          Model df       AIC       BIC   logLik   Test  L.Ratio p-value
-## msrh_m0      1 11 -159.0789 -136.4140 90.53945                        
-## msrh_m.1     2 11 -159.0789 -136.4140 90.53945                        
-## msrh_m.2     3 12 -162.7721 -138.0468 93.38603 2 vs 3 5.693165  0.0170
-## msrh_m.3     4 12 -157.5509 -132.8256 90.77546                        
-## msrh_m.4     5 12 -162.7721 -138.0468 93.38603                        
-## msrh_m.5     6 14 -159.2691 -130.4229 93.63457 5 vs 6 0.497079  0.7799
-## msrh_m.6     7 12 -157.5509 -132.8256 90.77546 6 vs 7 5.718233  0.0573
-## msrh_m.7     8 14 -159.2691 -130.4229 93.63457 7 vs 8 5.718233  0.0573
+#anova(msrh_m0,msrh_m.1, msrh_m.2, msrh_m.3, msrh_m.4, msrh_m.5, msrh_m.6, msrh_m.7)
 
-car::Anova(msrh_m.4, Test="F", type = 3)
-## Analysis of Deviance Table (Type III tests)
-## 
-## Response: mass_spec_resp
-##                        Chisq Df Pr(>Chisq)    
-## (Intercept)         835.3960  1    < 2e-16 ***
-## group                 1.0972  1    0.29488    
-## sex                   2.8282  1    0.09262 .  
-## treatment             2.0103  1    0.15623    
-## group:sex             0.2430  1    0.62204    
-## group:treatment       0.9384  1    0.33268    
-## sex:treatment         3.1963  1    0.07381 .  
-## group:sex:treatment   1.2080  1    0.27174    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-kable(anova(msrh_m.4))
+kable(car::Anova(msrh_m.4, Test="F", type = 3))
 ```
 
-|                     | numDF | denDF |     F-value |   p-value |
-|:--------------------|------:|------:|------------:|----------:|
-| (Intercept)         |     1 |    55 | 948.8230258 | 0.0000000 |
-| group               |     1 |    55 |   1.1584158 | 0.2864929 |
-| sex                 |     1 |    55 |   3.8774571 | 0.0539849 |
-| treatment           |     1 |    55 |   2.4873897 | 0.1204969 |
-| group:sex           |     1 |    55 |   0.1399003 | 0.7098182 |
-| group:treatment     |     1 |    55 |   0.5729580 | 0.4523164 |
-| sex:treatment       |     1 |    55 |   4.5059225 | 0.0382940 |
-| group:sex:treatment |     1 |    55 |   1.2079614 | 0.2765241 |
+|                     |       Chisq |  Df | Pr(\>Chisq) |
+|:--------------------|------------:|----:|------------:|
+| (Intercept)         | 835.3960324 |   1 |   0.0000000 |
+| group               |   1.0972123 |   1 |   0.2948787 |
+| sex                 |   2.8282168 |   1 |   0.0926211 |
+| treatment           |   2.0103233 |   1 |   0.1562320 |
+| group:sex           |   0.2430094 |   1 |   0.6220410 |
+| group:treatment     |   0.9384343 |   1 |   0.3326808 |
+| sex:treatment       |   3.1962510 |   1 |   0.0738073 |
+| group:sex:treatment |   1.2079614 |   1 |   0.2717362 |
 
 ## Supp. Table 3
 
@@ -1000,16 +659,7 @@ blh_m.5 <- update(blh_m0, weights = varIdent(form = ~1|sex*treatment))
 blh_m.6 <- update(blh_m0, weights = varIdent(form = ~1|stage*treatment))
 blh_m.7 <- update(blh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
-anova(blh_m0,blh_m.1, blh_m.2, blh_m.3, blh_m.4, blh_m.5, blh_m.6, blh_m.7)
-##         Model df       AIC       BIC   logLik   Test   L.Ratio p-value
-## blh_m0      1 11 -204.6045 -181.9396 113.3023                         
-## blh_m.1     2 11 -204.6045 -181.9396 113.3023                         
-## blh_m.2     3 12 -202.6229 -177.8976 113.3115 2 vs 3 0.0184183  0.8920
-## blh_m.3     4 12 -203.0974 -178.3721 113.5487                         
-## blh_m.4     5 12 -202.6229 -177.8976 113.3115                         
-## blh_m.5     6 14 -201.7259 -172.8797 114.8630 5 vs 6 3.1030215  0.2119
-## blh_m.6     7 12 -203.0974 -178.3721 113.5487 6 vs 7 2.6285337  0.2687
-## blh_m.7     8 14 -201.7259 -172.8797 114.8630 7 vs 8 2.6285337  0.2687
+#anova(blh_m0,blh_m.1, blh_m.2, blh_m.3, blh_m.4, blh_m.5, blh_m.6, blh_m.7)
 
 kable(car::Anova(blh_m0, Test="F", type = 3))
 ```
@@ -1049,79 +699,16 @@ dth_m.2 <- update(dth_m0, weights = varIdent(form = ~1|treatment))
 dth_m.3 <- update(dth_m0, weights = varIdent(form = ~1|sex*treatment))
 
 #Comparisons of models built
-anova(dth_m0,dth_m.1, dth_m.2, dth_m.3)
-##         Model df      AIC      BIC    logLik   Test  L.Ratio p-value
-## dth_m0      1 11 234.6426 257.8623 -106.3213                        
-## dth_m.1     2 12 229.9385 255.2690 -102.9693 1 vs 2 6.704141  0.0096
-## dth_m.2     3 12 236.0944 261.4249 -106.0472                        
-## dth_m.3     4 14 230.2697 259.8220 -101.1349 3 vs 4 9.824668  0.0074
+#anova(dth_m0,dth_m.1, dth_m.2, dth_m.3)
 
 #Residual plot
-plot(dth_m.3)
-```
-
-<img src="../Output/Figures/Markdown/S_Table4-1.png" style="display: block; margin: auto auto auto 0;" />
-
-``` r
-m.3.e <- resid(dth_m.3, type = 'pearson')
+#plot(dth_m.3)
+#m.3.e <- resid(dth_m.3, type = 'pearson')
 #Q-Q plot
-qqnorm(m.3.e); qqline(m.3.e, col = 2)
-```
-
-<img src="../Output/Figures/Markdown/S_Table4-2.png" style="display: block; margin: auto auto auto 0;" />
-
-``` r
+#qqnorm(m.3.e); qqline(m.3.e, col = 2)
 
 #Summary and stats of selected model
-summary(dth_m.3)
-## Linear mixed-effects model fit by REML
-##   Data: dev_time_data 
-##        AIC     BIC    logLik
-##   230.2697 259.822 -101.1349
-## 
-## Random effects:
-##  Formula: ~1 | replicate
-##         (Intercept)
-## StdDev:   0.5833195
-## 
-##  Formula: ~1 | id %in% replicate
-##         (Intercept) Residual
-## StdDev:   0.3537172 1.110317
-## 
-## Variance function:
-##  Structure: Different standard deviations per stratum
-##  Formula: ~1 | sex * treatment 
-##  Parameter estimates:
-## F*heatstress    M*control    F*control M*heatstress 
-##    1.0000000    0.0192644    0.9145939    0.5950628 
-## Fixed effects:  dev_time ~ group * sex * treatment 
-##                            Value Std.Error DF   t-value p-value
-## (Intercept)             7.584537 0.3564460 59 21.278221  0.0000
-## group1                 -0.196765 0.1166306 59 -1.687080  0.0969
-## sex1                    0.299919 0.1161868 59  2.581348  0.0123
-## treatment1             -0.191222 0.1159995 59 -1.648474  0.1046
-## group1:sex1             0.126363 0.1176525 59  1.074032  0.2872
-## group1:treatment1       0.038073 0.1156838 59  0.329111  0.7432
-## sex1:treatment1        -0.014019 0.1146142 59 -0.122319  0.9031
-## group1:sex1:treatment1  0.139422 0.1149071 59  1.213344  0.2298
-##  Correlation: 
-##                        (Intr) group1 sex1   trtmn1 grp1:s1 grp1:t1 sx1:t1
-## group1                 -0.110                                            
-## sex1                   -0.011  0.190                                     
-## treatment1             -0.113  0.129  0.293                              
-## group1:sex1             0.074 -0.056 -0.312 -0.280                       
-## group1:treatment1       0.039 -0.367 -0.273 -0.332  0.310                
-## sex1:treatment1         0.101 -0.293 -0.364 -0.022  0.126   0.199        
-## group1:sex1:treatment1 -0.101  0.344  0.130  0.195 -0.390  -0.018  -0.311
-## 
-## Standardized Within-Group Residuals:
-##          Min           Q1          Med           Q3          Max 
-## -1.760269740 -0.693976619 -0.003875959  0.363285060  2.458073780 
-## 
-## Number of Observations: 69
-## Number of Groups: 
-##         replicate id %in% replicate 
-##                 3                69
+#summary(dth_m.3)
 kable(car::Anova(dth_m.3, test="F", type = 3))
 ```
 
