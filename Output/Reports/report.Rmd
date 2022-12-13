@@ -1,21 +1,37 @@
 ---
-title: "Mat H-H Masters Thesis Data Analysis"
-author: "Mathew Holmes-Hackerd"
+title: "Figures for: Naupliar exposure to acute warming shows no carryover ontogenetic effects on respiration, body size, or development time in the copepod Acartia tonsa"
+author: Mathew Holmes-Hackerd
 date: "`r Sys.Date()`"
-output:
+output: 
   html_document:
-    toc: yes
-    toc_float: yes
-    code_folding: hide
+          code_folding: hide
+          code_download: true
+          toc: true
+          toc_float: true
+  github_document:
+          html_preview: false
+          toc: true
+          toc_depth: 3
 ---
 
-# Setup 
-```{r setup, include=TRUE}
+```{r setup, include=T, message = F, warning = F, echo = F}
+library(nlme)
+library(survival)
+library(survminer)
+library(MASS)
+library(knitr)
+
+knitr::opts_chunk$set(
+  echo = knitr::is_html_output(),
+  fig.align = "center",
+  fig.path = "../Figures/markdown/",
+  message = FALSE,
+  warning = FALSE,
+  collapse = T,
+  dev = c("png", "pdf")
+)
 
 knitr::opts_chunk$set(echo = T, warning = F, message = F, fig.align = "left", fig.path = "../Output/Figures/Markdown/",dev = c('png', 'pdf'))
-
-library(nlme)
-
 
 theme_mat = function(base_size){
   ggpubr::theme_pubr(base_family="serif") %+replace% 
@@ -45,11 +61,6 @@ group_color_vector1 = c("Control" = "black",
 ```
 
 ```{r Making_Surv_Figs, include=TRUE}
-
-#Reads in survival data 
-surv_data = read_xlsx("Data/survival_test_corr.xlsx")%>%
-  filter(group == "active")
-
 #Kaplan-Meier Analysis for survival, uses survminer package
 
 km_combined = survfit(Surv(death_day, status) ~ treatment, data = surv_data)
@@ -128,7 +139,7 @@ tpc = ggplot(mort_data, aes(x = stress_temp, y = survivorship)) +
   )
 
 #Below creates the nauplii msr boxplot
-naup_resp = ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = temp))+
+naup_resp = ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = factor(temp))) +
   geom_boxplot(outlier.size = 0.0, outlier.shape=NA) +
   geom_point(position = position_dodge(width=0.75)) +
   labs(
@@ -436,14 +447,14 @@ AIC(log.model, linear.model, exp.model)
 ## Supp. Figure 1   
 ```{r S_Fig1, include=TRUE, fig.width=7, fig.height=6}
 data_tidyd = o2_record %>% 
-  pivot_longer(cols = starts_with(c("Test - A", "Test - B", "Test - C", "Test - D", "Control - A", "Control - B", "Control - C", "Control - D")),
+  pivot_longer(cols = starts_with(c("Test", "Control")),
                names_to = c("vial"),
                values_to = "O2") %>%  
   mutate("treatment" = if_else(str_detect(vial, "Control"), "Control", "Copepod"),                       
          vial = str_extract(vial, "[:alpha:][:digit:]"),
          "vial_id" = paste(vial, rep, sep = "_")) %>% 
   group_by(vial_id) %>% 
-  arrange(`Time/Min.`) %>% 
+  arrange(Time.Min.) %>% 
   mutate("scaled_O2" = O2 / first(O2)) %>% 
   drop_na(scaled_O2)%>%
   ungroup()%>%
@@ -453,19 +464,14 @@ data_tidyd = o2_record %>%
 #Creates drawdown figure of a single experimental day
 data_tidyd %>%
   filter(day_id == "R1_3_24")%>%
-  ggplot(aes(x = `Time/Min.`, y = scaled_O2, colour = treatment, group = vial)) +
-  #facet_wrap(.~day_id, scales = "free_x") + 
+  ggplot(aes(x = Time.Min., y = scaled_O2, colour = treatment, group = vial)) +
   scale_color_manual(values = group_color_vector1) + 
-  labs(
-    x= "Time (min.)",
-    y="Scaled Oxygen (% intitial saturation)", 
-    colour = "Vial Type"
-  ) +
+  labs(x= "Time (min.)",
+       y="Scaled Oxygen (% intitial saturation)", 
+       colour = "Vial Type") +
   geom_point(size = 1) + 
-  #theme_bw(base_size = 30) + 
   theme(panel.grid = element_blank())+
   geom_smooth(method = "lm") +
-  # theme_mat() 
   theme_bw(base_size = 17, base_family="serif")+
   theme(panel.grid = element_blank(),
         axis.line.x.bottom = element_line(color = 'black'),
@@ -473,8 +479,7 @@ data_tidyd %>%
         axis.line.y.right  = element_blank(),
         axis.text.y.right  = element_blank(),
         axis.ticks.y.right = element_blank(),
-        panel.border       = element_blank(),
-  )
+        panel.border       = element_blank())
 ```
 
 ## Supp. Figure 2   
@@ -490,7 +495,7 @@ S_Fig3
 ## Supp. Table 1    
 ```{r S_Table1, include=FALSE}
 #Emmeans post-hoc analysis of selected body length model
-emmeans(bl_m.6,  pairwise ~ stage : sex )
+kable(emmeans::emmeans(bl_m.6,  pairwise ~ stage : sex )$emmeans)
 ```
 
 ## Supp. Table 2    
@@ -514,7 +519,7 @@ msrh_m.7 <- update(msrh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 anova(msrh_m0,msrh_m.1, msrh_m.2, msrh_m.3, msrh_m.4, msrh_m.5, msrh_m.6, msrh_m.7)
 
 car::Anova(msrh_m.4, Test="F", type = 3)
-anova(msrh_m.4)
+kable(anova(msrh_m.4))
 ```
 
 ## Supp. Table 3    
@@ -531,7 +536,7 @@ blh_m.7 <- update(blh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
 anova(blh_m0,blh_m.1, blh_m.2, blh_m.3, blh_m.4, blh_m.5, blh_m.6, blh_m.7)
 
-car::Anova(blh_m0, Test="F", type = 3)
+kable(car::Anova(blh_m0, Test="F", type = 3))
 ```
 
 ## Supp. Table 4    
@@ -567,5 +572,5 @@ qqnorm(m.3.e); qqline(m.3.e, col = 2)
 
 #Summary and stats of selected model
 summary(dth_m.3)
-car::Anova(dth_m.3, test="F", type = 3)
+kable(car::Anova(dth_m.3, test="F", type = 3))
 ```
