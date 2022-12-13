@@ -391,7 +391,7 @@ ind_slopes = df1 %>%
   summarise(slope = coef(lm(log10(mass_spec_resp) ~ log10(weight_mgC)))[2],
             n = n()) %>% 
   drop_na() %>% 
-  filter(n == 6) 
+  filter(n >3) 
 
 ind_slopes %>%  #Summarizes the individual slopes; copepods that had respiration measured at all 6 stages 
   ungroup() %>% 
@@ -402,9 +402,9 @@ ind_slopes %>%  #Summarizes the individual slopes; copepods that had respiration
   kable(align = "c")
 ```
 
-|  n  |   mean   |    se     |     range     |
-|:---:|:--------:|:---------:|:-------------:|
-| 16  | -0.36155 | 0.0819492 | -0.88 to 0.32 |
+|  n  |    mean    |    se     |     range     |
+|:---:|:----------:|:---------:|:-------------:|
+| 38  | -0.4348797 | 0.0594185 | -1.17 to 0.56 |
 
 # Tables
 
