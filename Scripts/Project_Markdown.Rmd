@@ -28,12 +28,10 @@ library(gridExtra)
 library(car)
 library(DT)
 library(survival)
-library(ranger)
 library(survminer)
-library(ggfortify)
 library(emmeans)
-#library(plotrix)
 library(MASS)
+
 
 theme_mat = function(base_size){
   ggpubr::theme_pubr(base_family="serif") %+replace% 
@@ -62,8 +60,50 @@ group_color_vector1 = c("Control" = "black",
                        "Copepod" = "gold")
   
 
+
 ```
 
+```{r Making_Surv_Figs, include=TRUE}
+
+#Reads in survival data 
+
+surv_data = read_xlsx("Data/survival_test_corr.xlsx")%>%
+  filter(group == "active")
+
+#Kaplan-Meier Analysis for survival, uses survminer package
+
+km_combined = survfit(Surv(death_day, status) ~ treatment, data = surv_data)
+
+summary(km_combined, times = c(1:16))
+
+S_Fig2 = ggsurvplot(
+  fit = survfit(Surv(death_day, status) ~ treatment, data = surv_data),
+  xlab = "Days", 
+  ylab = "Survival Proportion", 
+  title = "Kaplan-Meier Proportional Survival Estimates",
+  palette = c("lightskyblue", "tomato2"),
+  conf.int = TRUE, 
+  pval = FALSE,
+  ggtheme = theme_bw(base_size = 15, base_family="serif")+
+  theme(panel.grid = element_blank(),
+    axis.line.x.bottom = element_line(color = 'black'),
+    axis.line.y.left   = element_line(color = 'black'),
+    axis.line.y.right  = element_blank(),
+    axis.text.y.right  = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    panel.border       = element_blank(),
+    legend.position = "none"
+    ))
+
+
+cox_model <- coxph(Surv(death_day, status) ~ treatment + replicate, data = surv_data)
+
+summary(cox_model)
+
+S_Fig3 = ggforest(cox_model, data = surv_data)
+
+
+```
 
 # Carpentry and Analysis 
 ``` {r Copepodite Respiration-Size-Molt Analysis, include=TRUE}
@@ -248,6 +288,9 @@ full_dataset = inner_join(resp_rates,molt_record, by = c("id", "stage"))%>%
   filter(date == min(date))%>%
   ungroup(stage)%>%
   mutate("stage_duration" = lead(days) - days)
+
+
+
 ```           
 
 
@@ -425,18 +468,21 @@ naup_resp_rates$resp_rate = naup_resp_rates$resp_rate * -1
 
 naup_resp_rates$msr_B88 = naup_resp_rates$msr_B88 * -1
 
+
+
 ```
 
 
 
 # Figures
 
-```{r Fig1, include=TRUE, fig.width=8, fig.height=8}
+```{r Fig1, include=TRUE, fig.width=14, fig.height=6}
+
+#Read in nauplii survival data 
+mort_data = read_excel(path = "Data/Nauplii/Survivorship/July_nauplii_survivorship.xlsx")
 
 
-surv_data = read_excel(path = "Data/Nauplii/Survivorship/July_nauplii_survivorship.xlsx")
-
-tolerance = surv_data %>% 
+tolerance = mort_data %>% 
   group_by(population, dev_temp) %>% #Breaks data down into experimental groups (populations, collections, dev. temps)
   group_modify(~ data.frame( #For each of these groups, store these values in a data frame
     "LD50" = unclass( #Use a glm to estimate TPCs and then use those TPCs to estimate LD50
@@ -447,7 +493,8 @@ tolerance = surv_data %>%
              glm(data = .x, survivorship ~ stress_temp, family=binomial(link = "logit"))), 
       "SE")))
 
-ggplot(surv_data, aes(x = stress_temp, y = survivorship)) +
+# Below creates the tpc curve
+tpc = ggplot(mort_data, aes(x = stress_temp, y = survivorship)) +
   geom_segment(aes(x=18, xend=tolerance$LD50, y=0.5, yend=0.5)) +
   geom_segment(aes(x=tolerance$LD50, xend=tolerance$LD50, y=0, yend=0.5)) +
  # geom_hline(yintercept = 0.5, size = 1, colour = "gray80") + 
@@ -457,49 +504,15 @@ ggplot(surv_data, aes(x = stress_temp, y = survivorship)) +
   geom_smooth(method = "glm", se=T, method.args = list(family = "binomial"), size = 1.2, colour = "black") + 
   scale_y_continuous(breaks = c(0, 0.5, 1)) + 
   xlab("Stress Temperature (degrees C)") +
-  ylab("Individual Survivorship") +  
-  theme_pubr(base_size = 15) +
+  ylab("Individual Survivorship") + 
+  labs(
+    tag = "(A)"
+  )+
+  theme_bw(base_size = 17, base_family = "serif") +
   annotate("text", x=25, y=0.57,
            label = "LD50 = 32.0 degrees C", 
            col = "black", 
-           size = 8)
-```
-
-
-```{r Fig2, include=TRUE}
-
-data_tidyd = o2_record %>% 
-  pivot_longer(cols = starts_with(c("Test - A", "Test - B", "Test - C", "Test - D", "Control - A", "Control - B", "Control - C", "Control - D")),
-               names_to = c("vial"),
-               values_to = "O2") %>%  
-  mutate("treatment" = if_else(str_detect(vial, "Control"), "Control", "Copepod"),                       
-         vial = str_extract(vial, "[:alpha:][:digit:]"),
-         "vial_id" = paste(vial, rep, sep = "_")) %>% 
-  group_by(vial_id) %>% 
-  arrange(`Time/Min.`) %>% 
-  mutate("scaled_O2" = O2 / first(O2)) %>% 
-  drop_na(scaled_O2)%>%
-  ungroup()%>%
-  mutate("label"=paste("Day", rep, sep = " "),
-         "label"=fct_reorder(label,rep,min))
-
-#Creates drawdown figure of a single experimental day
-data_tidyd %>%
-  filter(day_id == "R1_3_24")%>%
-ggplot(aes(x = `Time/Min.`, y = scaled_O2, colour = treatment, group = vial)) +
-  #facet_wrap(.~day_id, scales = "free_x") + 
-  scale_color_manual(values = group_color_vector1) + 
-  labs(
-    x= "Time (min.)",
-    y="Scaled Oxygen (% intitial saturation)", 
-    colour = "Vial Type"
-  ) +
-  geom_point(size = 1) + 
-  #theme_bw(base_size = 30) + 
-  theme(panel.grid = element_blank())+
-  geom_smooth(method = "lm") +
- # theme_mat() 
-  theme_bw(base_size = 30, base_family="serif")+
+           size = 8) +
   theme(panel.grid = element_blank(),
     axis.line.x.bottom = element_line(color = 'black'),
     axis.line.y.left   = element_line(color = 'black'),
@@ -507,21 +520,18 @@ ggplot(aes(x = `Time/Min.`, y = scaled_O2, colour = treatment, group = vial)) +
     axis.text.y.right  = element_blank(),
     axis.ticks.y.right = element_blank(),
     panel.border       = element_blank(),
+    legend.position = "none"
     )
 
-
-```
-
-
-```{r Fig3}
-
-ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = temp))+
+#Below creates the nauplii msr boxplot
+naup_resp = ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = temp))+
   geom_boxplot(outlier.size = 0.0, outlier.shape=NA) +
   geom_point(position = position_dodge(width=0.75)) +
   labs(
     x = "Temperature (C)", 
     y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg Carbon)",
-    fill = "Temperature"
+    fill = "Temperature", 
+    tag = "(B)"
   )+
    scale_fill_manual(labels = c("18", "28"), values = c("lightskyblue", "tomato2"))+
  # theme_mat()+
@@ -536,56 +546,79 @@ theme(panel.grid = element_blank(),
     legend.position = "none"
     )
 
+ggarrange(tpc, naup_resp, nrow = 1)
 
 
 ```
 
 
 
-```{r Fig4, include=TRUE, fig.width=13, fig.height=8}
+```{r Fig2, include=TRUE, fig.width=12, fig.height=6}
 
 axis_weights = c(400, 600, 800)
 break_weights = (axis_weights^2.92 * (1.11*10^-5))
 
 
-full_dataset %>% filter(group == "active")%>% drop_na(sex)%>% 
+full_dataset %>% filter(group == "active")%>% drop_na(sex)%>%
   mutate(
-    new_sex = ifelse(sex %in% c("man", "Male", "M", "MALE"), "Male", "Female") 
+    new_sex = ifelse(sex %in% c("man", "Male", "M", "MALE"), "Male", "Female")
   ) %>%
-  ggplot(aes(x=stage, y=length_um, fill=treatment)) + 
+  ggplot(aes(x=stage, y=length_um, fill=treatment)) +
   facet_grid(.~new_sex) +
   geom_boxplot(lwd=0.25, outlier.shape=NA) +
   geom_point(position = position_dodge(width=0.75), size=0.65) +
-  
+
   #scale_y_continuous(name="Body Length (mm)", sec.axis=sec_axis(((~.1^2.92 * (1.11*10^-5)), name= "test axis")) +
-                       
-  scale_y_continuous(sec.axis=sec_axis(~.^2.92 * (1.11*10^-5), name = "Mass (ng C)", breaks = round(break_weights, digits=0))) +                     
-                       
+
+  scale_y_continuous(sec.axis=sec_axis(~.^2.92 * (1.11*10^-5), name = "Mass (ng C)", breaks = round(break_weights, digits=0))) +
+
   #scale_y_continuous(name="Body Length (mm)", sec.axis=sec_axis(~.* 575439937 * 0.0000111, name= "test axis")) +
   #theme_mat() +
- # scale_fill_manual(values = treatment_color_vector)+ 
+ # scale_fill_manual(values = treatment_color_vector)+
    scale_fill_manual(labels = c("Control", "Heat Stress"), values = c("lightskyblue", "tomato2")) +
-  labs( x = "Copepodite Stage", 
+  labs( x = "Copepodid Stage",
     y = "Body Length (um)",
     fill = "Experimental Group") +
-  theme_bw(base_size = 21, base_family="arial") +
+  theme_bw(base_size = 21, base_family="serif") +
   theme(panel.grid = element_blank())
-
 
 
 ```
 
 
-```{r Fig5, include=TRUE, fig.width = 13, fig.height=8 }
+```{r Fig3, include=TRUE, fig.width = 12, fig.height=6 }
 #Creates combined per capita and mass-specific respiration plot
 
 plot_data = full_dataset %>% 
   filter(mass_spec_resp >= 0, group == "active")
 
+temp_naup_resp = naup_resp_rates %>%
+  filter(msr_B88>0, temp == "18") %>%
+  dplyr::select(10,11)
+
+temp_naup_resp$stage <- "n"
+temp_naup_resp$treatment = "control"
+
+names(temp_naup_resp)[2] = "mass_spec_resp"
+temp_naup_resp
+temp_naup_resp$resp_mL_h = temp_naup_resp$resp_mL_h * -1
+
+temp_plot_data = plot_data %>%
+    ungroup() %>%
+    filter(group == "active", mass_spec_resp >0) %>%
+    dplyr::select(6,11,12,13)
+
+temp_df_resp = rbind(temp_naup_resp, temp_plot_data)
+
+
+temp_df_resp$stage = factor(temp_df_resp$stage, levels = c("n", "c1", "c2", "c3", "c4", "c5", "c6"))
+
+
+
 panel_labs = c("(a)", "(b)")
 
 #Per capita respiration plot
-resp_plot = ggplot(plot_data, aes(x = stage, y = resp_mL_h, fill = treatment, colour = treatment)) + 
+resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h, fill = treatment, colour = treatment)) + 
   geom_hline(yintercept = 0, size = 1) + 
   #geom_point(position = position_dodge(width = 0.5), size = 2) + 
   geom_boxplot(colour = "black", outlier.shape=NA) +
@@ -594,16 +627,16 @@ resp_plot = ggplot(plot_data, aes(x = stage, y = resp_mL_h, fill = treatment, co
  # scale_fill_manual(values = treatment_color_vector)+ 
   scale_fill_manual(labels = c("Control", "Heat Stress"), values = c("lightskyblue", "tomato2")) +
   labs(
-    x = "Copepodite Stage",
-    y = "Respiration \n (mL Oxygen/hour/individual)",
+    x = "Copepodid Stage",
+    y = " Per Capita Respiration \n (mL Oxygen/hour/individual)",
     fill = "Experimental Group",
     tag = "(A)"
   ) +
   theme(text = element_text(size = 20,
-        family = "arial")) 
+        family = "serif")) 
 
 #Mass-specific respiration plot
-mass_spec_plot = ggplot(plot_data, aes(x = stage, y = mass_spec_resp, fill = treatment, colour = treatment)) + 
+mass_spec_plot = ggplot(temp_df_resp, aes(x = stage, y = mass_spec_resp, fill = treatment, colour = treatment)) + 
   geom_hline(yintercept = 0, size = 1) + 
   #geom_point(position = position_dodge(width = 0.5), size = 2) + 
   geom_boxplot(colour = "black",outlier.shape=NA) +
@@ -611,67 +644,22 @@ mass_spec_plot = ggplot(plot_data, aes(x = stage, y = mass_spec_resp, fill = tre
   theme_mat(base_size=10) + 
   scale_fill_manual(values = treatment_color_vector)+ 
   labs(
-    x = "Copepodite Stage", 
+    x = "Copepodid Stage", 
     y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg C)",
     fill = "Experimental Group",
     tag = "(B)"
   ) +
   theme(text = element_text(size = 20,
-                            family="arial"))
+                            family="serif"))
 
 #Combining the two plots into one figure
 ggarrange(resp_plot, mass_spec_plot, nrow = 1, common.legend = T) 
 
-```
 
-
-```{r Fig6, include=TRUE}
-
-#Reads in survival data 
-
-surv_data = read_xlsx("Data/survival_test_corr.xlsx")%>%
-  filter(group == "active")
-
-#Kaplan-Meier Analysis or survival, uses survminer package
-
-km_combined = survfit(Surv(death_day, status) ~ treatment, data = surv_data)
-
-summary(km_combined, times = c(1:16))
-
-ggsurvplot(
-  fit = survfit(Surv(death_day, status) ~ treatment, data = surv_data),
-  xlab = "Days", 
-  ylab = "Survival %", 
-  title = "Kaplan-Meier Proportional Survival Estimates",
-  palette = c("lightskyblue", "tomato2"),
-  conf.int = TRUE, 
-  pval = FALSE,
-  ggtheme = theme_bw(base_size = 15, base_family="serif")+
-  theme(panel.grid = element_blank(),
-    axis.line.x.bottom = element_line(color = 'black'),
-    axis.line.y.left   = element_line(color = 'black'),
-    axis.line.y.right  = element_blank(),
-    axis.text.y.right  = element_blank(),
-    axis.ticks.y.right = element_blank(),
-    panel.border       = element_blank(),
-    legend.position = "none"
-    ))
 
 ```
 
-
-```{r Fig7, include = TRUE}
-
-cox_model <- coxph(Surv(death_day, status) ~ treatment + replicate, data = surv_data)
-
-summary(cox_model)
-
-ggforest(cox_model, data = surv_data)
-
-```
-
-
-```{r Fig8, include=TRUE}
+```{r Fig4, include=TRUE, fig.width=7, fig.height=6}
 
 dev_time_data = molt_record %>% filter(stage %in% c("c1","c6"))%>%
   group_by(id, stage)%>%
@@ -700,7 +688,7 @@ ggplot(dev_time_data, aes(x=treatment, y=dev_time, fill=treatment)) +
     x = "Treatment",
     y = "Total Development Time from C1-C6 (days)",
     fill = "Experimental Group") +
-    theme_bw(base_size = 15, base_family="arial") +
+    theme_bw(base_size = 15, base_family="serif") +
   theme(panel.grid = element_blank(),
     axis.line.x.bottom = element_line(color = 'black'),
     axis.line.y.left   = element_line(color = 'black'),
@@ -712,10 +700,11 @@ ggplot(dev_time_data, aes(x=treatment, y=dev_time, fill=treatment)) +
     )+
   scale_x_discrete(labels = xlabs)
 
+
+
 ```
 
-
-```{r Fig9, include=TRUE}
+```{r Fig5, include=TRUE, fig.width=7, fig.height=6}
 
 full_dataset$msr_nl = full_dataset$mass_spec_resp * 1000000 
 full_dataset$weight_mgC = full_dataset$weight_ngC / 1000000
@@ -763,11 +752,148 @@ df1 = full_dataset %>%
 full_dataset$resp_nl_min_ind = (full_dataset$resp_mL_h * (1*10^6) ) / 60
 full_dataset$weight_mg = full_dataset$weight_ngC * (1*10^-6)
 
+
+
 ```
 
-# Statistical Tests 
 
-```{r Mass-specific Resp vs Weight Model Tests}
+# Tables 
+
+```{r Table1, include=FALSE}
+
+#Remove individuals that didnt make it to C6
+plot_data = plot_data %>%
+  drop_na(sex)
+
+#Makes all relevant data a factor
+plot_data$replicate <- as.factor(plot_data$replicate)
+plot_data$id <- as.factor(plot_data$id)
+plot_data$treatment <- as.factor(plot_data$treatment)
+plot_data$stage <- as.factor(plot_data$stage)
+plot_data$sex <- as.factor(plot_data$sex)
+plot_data$body_length <- as.factor(plot_data$body_length)
+
+require(nlme)
+
+#MUST SET THESE OPTIONS BEFORE RUNNING THE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+#All possible model comparisons
+msr_m0 <- lme(mass_spec_resp ~ stage * sex* treatment, random = ~1|replicate/id,data = plot_data)
+msr_m.1 <- update(msr_m0, weights = varIdent(form = ~1|stage))
+msr_m.2 <- update(msr_m0, weights = varIdent(form = ~1|sex))
+msr_m.3 <- update(msr_m0, weights = varIdent(form = ~1|treatment))
+msr_m.4 <- update(msr_m0, weights = varIdent(form = ~1|stage*sex))
+msr_m.5 <- update(msr_m0, weights = varIdent(form = ~1|sex*treatment))
+msr_m.6 <- update(msr_m0, weights = varIdent(form = ~1|stage*treatment))
+msr_m.7 <- update(msr_m0, weights = varIdent(form = ~1|stage*sex*treatment))
+
+#Comparison of models
+anova(msr_m0,msr_m.1, msr_m.2, msr_m.3, msr_m.4, msr_m.5, msr_m.6, msr_m.7)
+
+#Residual plot
+plot(msr_m.6)
+m.6.e <- resid(msr_m.6, type = 'pearson')
+
+#Q-Q plot
+qqnorm(m.6.e); qqline(m.6.e, col = 2)
+
+#Summary and stats of selected model
+summary(msr_m.6)
+car::Anova(msr_m.6, test="F", type = 3)
+
+
+```
+
+```{r Table2, include=FALSE}
+
+#Recreate plot_data df
+plot_data = full_dataset %>% 
+  filter(mass_spec_resp >= 0, group == "active")
+#Remove NAs for sex and body length 
+plot_data = plot_data %>%
+  drop_na(body_length)%>%
+  drop_na(sex) 
+
+require(nlme)
+
+#RUN THESE OPTIONS BEFORE THE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+
+#All possible model comparisons
+bl_m0 <- lme(body_length ~ stage * sex * treatment, random = ~1|replicate/id, data = plot_data, control =list(msMaxIter = 1000, msMaxEval = 1000))
+bl_m.1 <- update(bl_m0, weights = varIdent(form = ~1|stage))
+bl_m.2 <- update(bl_m0, weights = varIdent(form = ~1|sex))
+bl_m.3 <- update(bl_m0, weights = varIdent(form = ~1|treatment))
+bl_m.4 <- update(bl_m0, weights = varIdent(form = ~1|stage*sex))
+bl_m.5 <- update(bl_m0, weights = varIdent(form = ~1|sex*treatment))
+bl_m.6 <- update(bl_m0, weights = varIdent(form = ~1|stage*treatment))
+bl_m.7 <- update(bl_m0, weights = varIdent(form = ~1|stage*sex*treatment))
+
+#Comparison of models
+anova(bl_m0,bl_m.1, bl_m.2, bl_m.3, bl_m.4, bl_m.5, bl_m.6, bl_m.7)
+
+#Residual plot
+plot(bl_m.6)
+m.6.e <- resid(bl_m.6, type = 'pearson')
+
+#Q-Q plot
+qqnorm(m.6.e); qqline(m.6.e, col = 2)
+
+#Summary and stats of selected model
+car::Anova(bl_m.6, test="F", type = 3)
+anova(bl_m.6)
+summary(bl_m.6)
+
+
+```
+
+```{r Table3, include=FALSE}
+
+#RUN THESE OPTIONS BEFORE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+#All model comparisons 
+dt_m0 <- lme(dev_time ~ sex * treatment, random = ~1|replicate/id,data = dev_time_data,control = lmeControl(opt = "optim"))
+dt_m.1 <- update(dt_m0, weights = varIdent(form = ~1|sex))
+dt_m.2 <- update(dt_m0, weights = varIdent(form = ~1|treatment))
+dt_m.3 <- update(dt_m0, weights = varIdent(form = ~1|sex*treatment))
+
+#Comparisons of models built
+anova(dt_m0,dt_m.1, dt_m.2, dt_m.3)
+
+#Residual plot
+plot(dt_m.3)
+m.3.e <- resid(dt_m.3, type = 'pearson')
+#Q-Q plot
+qqnorm(m.3.e); qqline(m.3.e, col = 2)
+
+#SUmmary and stats of selected model
+summary(dt_m.3)
+car::Anova(dt_m.3, test="F", type = 3)
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Other Statistical Tests 
+
+```{r Mass-specific Resp vs Weight Model Tests, include=FALSE}
+
+#Used for generating figure 5, this AIC tells us the log model best fits the mass-spec resp vs weight data.
 
 log.model = lm(log(mass_spec_resp) ~ log(weight_mgC), data=full_dataset) 
 summary(log.model)
@@ -787,126 +913,150 @@ summary(exp.model)$r.squared
 
 AIC(log.model, linear.model, exp.model)
 
-```
-
-```{r Mass-specific Resp LME ANOVA, include=TRUE}
-#stage_mass_spec_resp.model = lme4::lmer(mass_spec_resp ~ stage + sex + treatment + (1|replicate/id), 
-#                                        data = plot_data)
-#car::Anova(stage_mass_spec_resp.model, test="F")
-#summary(stage_mass_spec_resp.model)
-
-
-#RUN THIS LINE BEFORE MODEL
-options(contrasts=c("contr.sum","contr.poly"))
-
-#log transformation or mass_spec_resp data
-plot_data$log_mass_spec_resp = log(plot_data$mass_spec_resp)
-
-#lme4 model of msr interactions w/ stage, sex, and treatment. random effects of exp. replicate and indiv. ID
-msr.model = lme4::lmer(log_mass_spec_resp ~ stage * sex * treatment + (1|replicate/id), 
-                                        data = plot_data)
-
-#ANOVA must be type 3 (if using "small a" anova: type m)
-car::Anova(msr.model, test="F", type = 3)
-
-#summary(int_stage_mass_spec_resp.model)
-
-#Residual plot of msr
-plot(msr.model)
-
-#Storage of residual output of msr model
-msr.model_res = resid(msr.model, type = "pearson")
-
-qqnorm(msr.model_res);qqline(msr.model_res, colour = "red")
-#log transform data to acount for non-normality of variance 
-
-
-#Additions from Catherine 
-
-
 
 
 ```
 
 
-```{r Body Length LME ANOVA, include=TRUE}
-#stage_size.model = lme4::lmer(body_length ~ stage + sex + treatment + (1|replicate/id),
-#                             data = plot_data)
-#car::Anova(stage_size.model, test="F")
-#summary(stage_size.model)
-
-#Log transformation of body length data
-plot_data$log_body_length = log(plot_data$body_length)
-
-#lme4 model of body size interaction with stage, sex, and treatment. random effects of exp. replicate and indiv. ID
-bl.model = lme4::lmer(log_body_length ~ stage * sex * treatment + (1|replicate/id),
-                              data = plot_data)
-
-car::Anova(bl.model, test="F", type = 3)
-
-plot(bl.model)
-
-bl.model_res = resid(bl.model, type = "pearson")
-
-qqnorm(bl.model_res);qqline(bl.model_res)
-#log transform data to acount for non-normality of variance 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Supplemental Information
+
+
+```{r S_Fig1, include=TRUE, fig.width=7, fig.height=6}
+
+data_tidyd = o2_record %>% 
+  pivot_longer(cols = starts_with(c("Test - A", "Test - B", "Test - C", "Test - D", "Control - A", "Control - B", "Control - C", "Control - D")),
+               names_to = c("vial"),
+               values_to = "O2") %>%  
+  mutate("treatment" = if_else(str_detect(vial, "Control"), "Control", "Copepod"),                       
+         vial = str_extract(vial, "[:alpha:][:digit:]"),
+         "vial_id" = paste(vial, rep, sep = "_")) %>% 
+  group_by(vial_id) %>% 
+  arrange(`Time/Min.`) %>% 
+  mutate("scaled_O2" = O2 / first(O2)) %>% 
+  drop_na(scaled_O2)%>%
+  ungroup()%>%
+  mutate("label"=paste("Day", rep, sep = " "),
+         "label"=fct_reorder(label,rep,min))
+
+#Creates drawdown figure of a single experimental day
+data_tidyd %>%
+  filter(day_id == "R1_3_24")%>%
+ggplot(aes(x = `Time/Min.`, y = scaled_O2, colour = treatment, group = vial)) +
+  #facet_wrap(.~day_id, scales = "free_x") + 
+  scale_color_manual(values = group_color_vector1) + 
+  labs(
+    x= "Time (min.)",
+    y="Scaled Oxygen (% intitial saturation)", 
+    colour = "Vial Type"
+  ) +
+  geom_point(size = 1) + 
+  #theme_bw(base_size = 30) + 
+  theme(panel.grid = element_blank())+
+  geom_smooth(method = "lm") +
+ # theme_mat() 
+  theme_bw(base_size = 17, base_family="serif")+
+  theme(panel.grid = element_blank(),
+    axis.line.x.bottom = element_line(color = 'black'),
+    axis.line.y.left   = element_line(color = 'black'),
+    axis.line.y.right  = element_blank(),
+    axis.text.y.right  = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    panel.border       = element_blank(),
+    )
 
 
 ```
 
-```{r Dev Time LME ANOVA, include=TRUE}
+```{r S_Fig2, include=TRUE, fig.width=7, fig.height=6}
 
-dev_time_data$log_dev_time = log(dev_time_data$dev_time)
-
-
-
-dt.model = lme4::lmer(log_dev_time ~ sex * treatment + (1|replicate),
-                            data = dev_time_data)
-                              
-
-plot(dt.model)
-
-dt.model_res = resid(dt.model, type = "pearson")
-
-qqnorm(dt.model_res);qqline(dt.model_res)
-#log transform data to acount for non-normality of variance 
-```
-
-
-```{r Body Length Post Hoc Test, include=TRUE}
-stage_size.model = lme4::lmer(body_length ~ stage + sex + treatment + stage*sex*treatment + (1|replicate/id),
-                              data = plot_data)
-
-car::Anova(stage_size.model, test="F")
-summary(stage_size.model)
-
-emmeans(stage_size.model,  pairwise ~ stage : sex )
+S_Fig2
 
 ```
 
-# Handling Control Statistical Tests
+```{r S_Fig3, include = TRUE, fig.width=7, fig.height=6}
 
-```{r Handling Comparison Data Frame, include=TRUE}
+S_Fig3
+
+
+```
+
+```{r S_Table1, include=FALSE}
+
+#Emmeans post-hoc analysis of selected body length model
+emmeans(bl_m.6,  pairwise ~ stage : sex )
+
+```
+
+```{r Handling Comparison Data Frame, include=FALSE}
+
 c6_handling_anova = full_dataset %>%
   filter(stage == "c6")
+  
 ```
 
-```{r Mass-specific Resp Hangling Comparison, include=TRUE}
-handling_resp = aov(mass_spec_resp ~ treatment*group*sex, data = c6_handling_anova)
+```{r S_Table2, include=FALSE}
+#Comparison of C6 mass-spec resp between actively handled and handling controls
 
-summary(handling_resp)
+#RUN THESE OPTIONS BEFORE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+msrh_m0 <- lme(mass_spec_resp ~ group * sex* treatment, random = ~1|replicate/id,data = c6_handling_anova)
+msrh_m.1 <- update(msrh_m0, weights = varIdent(form = ~1|stage))
+msrh_m.2 <- update(msrh_m0, weights = varIdent(form = ~1|sex))
+msrh_m.3 <- update(msrh_m0, weights = varIdent(form = ~1|treatment))
+msrh_m.4 <- update(msrh_m0, weights = varIdent(form = ~1|stage*sex))
+msrh_m.5 <- update(msrh_m0, weights = varIdent(form = ~1|sex*treatment))
+msrh_m.6 <- update(msrh_m0, weights = varIdent(form = ~1|stage*treatment))
+msrh_m.7 <- update(msrh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
+
+anova(msrh_m0,msrh_m.1, msrh_m.2, msrh_m.3, msrh_m.4, msrh_m.5, msrh_m.6, msrh_m.7)
+
+car::Anova(msrh_m.4, Test="F", type = 3)
+anova(msrh_m.4)
+
 ```
 
-```{r Body Length Handling Comparison, include=TRUE}
-handling_body_length = aov(body_length ~ treatment*group*sex, data = c6_handling_anova)
 
-summary(handling_body_length)
+```{r S_Table3, include=FALSE}
+#Comparison of C6 body lengths between actively handled and handling controls
+
+
+
+blh_m0 <- lme(body_length ~ group * sex* treatment, random = ~1|replicate/id,data = c6_handling_anova)
+blh_m.1 <- update(blh_m0, weights = varIdent(form = ~1|stage))
+blh_m.2 <- update(blh_m0, weights = varIdent(form = ~1|sex))
+blh_m.3 <- update(blh_m0, weights = varIdent(form = ~1|treatment))
+blh_m.4 <- update(blh_m0, weights = varIdent(form = ~1|stage*sex))
+blh_m.5 <- update(blh_m0, weights = varIdent(form = ~1|sex*treatment))
+blh_m.6 <- update(blh_m0, weights = varIdent(form = ~1|stage*treatment))
+blh_m.7 <- update(blh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
+
+anova(blh_m0,blh_m.1, blh_m.2, blh_m.3, blh_m.4, blh_m.5, blh_m.6, blh_m.7)
+
+car::Anova(blh_m0, Test="F", type = 3)
+
 ```
 
-```{r Dev Time Handling Comparison, include=TRUE}
+```{r S_Table4, include=FALSE}
+#Comparison of copepodid dev time between actively handled and handling controls 
 
+#Remake dev time data df
 dev_time_data = molt_record %>% filter(stage %in% c("c1","c6"))%>%
   group_by(id, stage)%>%
   filter(date == min(date))%>%
@@ -916,34 +1066,25 @@ dev_time_data = molt_record %>% filter(stage %in% c("c1","c6"))%>%
   dplyr::select(-stage,-days) %>%
   separate(id, c("replicate", "id_original"), sep = "_", remove=F)
 
-handling_dev_time = aov(dev_time ~ treatment*group*sex, data = dev_time_data)
+#RUN THESE OPTIONS BEFORE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
 
-summary(handling_dev_time)
+dth_m0 <- lme(dev_time ~ group* sex * treatment, random = ~1|replicate/id,data = dev_time_data,control = lmeControl(opt = "optim"))
+dth_m.1 <- update(dth_m0, weights = varIdent(form = ~1|sex))
+dth_m.2 <- update(dth_m0, weights = varIdent(form = ~1|treatment))
+dth_m.3 <- update(dth_m0, weights = varIdent(form = ~1|sex*treatment))
+
+#Comparisons of models built
+anova(dth_m0,dth_m.1, dth_m.2, dth_m.3)
+
+#Residual plot
+plot(dth_m.3)
+m.3.e <- resid(dth_m.3, type = 'pearson')
+#Q-Q plot
+qqnorm(m.3.e); qqline(m.3.e, col = 2)
+
+#Summary and stats of selected model
+summary(dth_m.3)
+car::Anova(dth_m.3, test="F", type = 3)
+
 ```
-
-
-
-
-
-```{r output chunk, include=FALSE}
-
-write.csv(plot_data,"Output/Data/plot_data.csv", row.names = F )
-
-write.csv(dev_time_data,"Output/Data/dev_time_data.csv", row.names = F )
-
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
