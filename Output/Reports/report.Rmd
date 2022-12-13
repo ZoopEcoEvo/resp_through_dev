@@ -342,18 +342,18 @@ msr_m.6 <- update(msr_m0, weights = varIdent(form = ~1|stage*treatment))
 msr_m.7 <- update(msr_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
 #Comparison of models
-anova(msr_m0,msr_m.1, msr_m.2, msr_m.3, msr_m.4, msr_m.5, msr_m.6, msr_m.7)
+#anova(msr_m0,msr_m.1, msr_m.2, msr_m.3, msr_m.4, msr_m.5, msr_m.6, msr_m.7)
 
 #Residual plot
-plot(msr_m.6)
-m.6.e <- resid(msr_m.6, type = 'pearson')
+#plot(msr_m.6)
+#m.6.e <- resid(msr_m.6, type = 'pearson')
 
 #Q-Q plot
-qqnorm(m.6.e); qqline(m.6.e, col = 2)
+#qqnorm(m.6.e); qqline(m.6.e, col = 2)
 
 #Summary and stats of selected model
-summary(msr_m.6)
-car::Anova(msr_m.6, test="F", type = 3)
+#summary(msr_m.6)
+kable(car::Anova(msr_m.6, test="F", type = 3))
 ```
 
 ## Table 2    
@@ -380,19 +380,18 @@ bl_m.6 <- update(bl_m0, weights = varIdent(form = ~1|stage*treatment))
 bl_m.7 <- update(bl_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
 #Comparison of models
-anova(bl_m0,bl_m.1, bl_m.2, bl_m.3, bl_m.4, bl_m.5, bl_m.6, bl_m.7)
+#anova(bl_m0,bl_m.1, bl_m.2, bl_m.3, bl_m.4, bl_m.5, bl_m.6, bl_m.7)
 
 #Residual plot
-plot(bl_m.6)
-m.6.e <- resid(bl_m.6, type = 'pearson')
+#plot(bl_m.6)
+#m.6.e <- resid(bl_m.6, type = 'pearson')
 
 #Q-Q plot
-qqnorm(m.6.e); qqline(m.6.e, col = 2)
+#qqnorm(m.6.e); qqline(m.6.e, col = 2)
 
 #Summary and stats of selected model
-car::Anova(bl_m.6, test="F", type = 3)
-anova(bl_m.6)
-summary(bl_m.6)
+kable(car::Anova(bl_m.6, test="F", type = 3))
+#summary(bl_m.6)
 ```
 
 ## Table 3    
@@ -407,17 +406,17 @@ dt_m.2 <- update(dt_m0, weights = varIdent(form = ~1|treatment))
 dt_m.3 <- update(dt_m0, weights = varIdent(form = ~1|sex*treatment))
 
 #Comparisons of models built
-anova(dt_m0,dt_m.1, dt_m.2, dt_m.3)
+#anova(dt_m0,dt_m.1, dt_m.2, dt_m.3)
 
 #Residual plot
-plot(dt_m.3)
-m.3.e <- resid(dt_m.3, type = 'pearson')
+#plot(dt_m.3)
+#m.3.e <- resid(dt_m.3, type = 'pearson')
 #Q-Q plot
-qqnorm(m.3.e); qqline(m.3.e, col = 2)
+#qqnorm(m.3.e); qqline(m.3.e, col = 2)
 
-#SUmmary and stats of selected model
-summary(dt_m.3)
-car::Anova(dt_m.3, test="F", type = 3)
+#Summary and stats of selected model
+#summary(dt_m.3)
+kable(car::Anova(dt_m.3, test="F", type = 3))
 ```
 
 # Other Statistical Tests 
@@ -516,10 +515,9 @@ msrh_m.5 <- update(msrh_m0, weights = varIdent(form = ~1|sex*treatment))
 msrh_m.6 <- update(msrh_m0, weights = varIdent(form = ~1|stage*treatment))
 msrh_m.7 <- update(msrh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
-anova(msrh_m0,msrh_m.1, msrh_m.2, msrh_m.3, msrh_m.4, msrh_m.5, msrh_m.6, msrh_m.7)
+#anova(msrh_m0,msrh_m.1, msrh_m.2, msrh_m.3, msrh_m.4, msrh_m.5, msrh_m.6, msrh_m.7)
 
-car::Anova(msrh_m.4, Test="F", type = 3)
-kable(anova(msrh_m.4))
+kable(car::Anova(msrh_m.4, Test="F", type = 3))
 ```
 
 ## Supp. Table 3    
@@ -534,7 +532,7 @@ blh_m.5 <- update(blh_m0, weights = varIdent(form = ~1|sex*treatment))
 blh_m.6 <- update(blh_m0, weights = varIdent(form = ~1|stage*treatment))
 blh_m.7 <- update(blh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
 
-anova(blh_m0,blh_m.1, blh_m.2, blh_m.3, blh_m.4, blh_m.5, blh_m.6, blh_m.7)
+#anova(blh_m0,blh_m.1, blh_m.2, blh_m.3, blh_m.4, blh_m.5, blh_m.6, blh_m.7)
 
 kable(car::Anova(blh_m0, Test="F", type = 3))
 ```
@@ -562,15 +560,15 @@ dth_m.2 <- update(dth_m0, weights = varIdent(form = ~1|treatment))
 dth_m.3 <- update(dth_m0, weights = varIdent(form = ~1|sex*treatment))
 
 #Comparisons of models built
-anova(dth_m0,dth_m.1, dth_m.2, dth_m.3)
+#anova(dth_m0,dth_m.1, dth_m.2, dth_m.3)
 
 #Residual plot
-plot(dth_m.3)
-m.3.e <- resid(dth_m.3, type = 'pearson')
+#plot(dth_m.3)
+#m.3.e <- resid(dth_m.3, type = 'pearson')
 #Q-Q plot
-qqnorm(m.3.e); qqline(m.3.e, col = 2)
+#qqnorm(m.3.e); qqline(m.3.e, col = 2)
 
 #Summary and stats of selected model
-summary(dth_m.3)
+#summary(dth_m.3)
 kable(car::Anova(dth_m.3, test="F", type = 3))
 ```
