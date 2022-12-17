@@ -32,5 +32,5 @@ surv_data = read_xlsx("Data/survival_test_corr.xlsx")%>%
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here
          output_file = "report.html", #Name your file here; as it is, this line will create reports named with the date
-         output_format = "all")
+         output_format = "github_document")
 }

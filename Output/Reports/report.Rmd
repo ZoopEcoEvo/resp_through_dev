@@ -31,8 +31,6 @@ knitr::opts_chunk$set(
   dev = c("png", "pdf")
 )
 
-knitr::opts_chunk$set(echo = T, warning = F, message = F, fig.align = "left", fig.path = "../Output/Figures/Markdown/",dev = c('png', 'pdf'))
-
 theme_mat = function(base_size){
   ggpubr::theme_pubr(base_family="serif") %+replace% 
     theme(
