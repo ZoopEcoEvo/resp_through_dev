@@ -5,6 +5,8 @@ output:
     fig_caption: true
     keep_tex: false
     citation_package: natbib
+  word_document:
+    reference_docx: doc_template.docx  
 title: "Naupliar exposure to acute warming shows no carryover ontogenetic effects on respiration, body size, or development time in the cosmopolitan copepod *Acartia tonsa*"
 author:
   - name: Mathew Holmes-Hackerd
