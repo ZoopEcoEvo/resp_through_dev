@@ -95,7 +95,7 @@ $if(anonymous)$$else$\author{$for(author)$\Large $author.name$\vspace{0.01in} \n
 \titlespacing*{\subsection}
   {0pt}{1\baselineskip}{0.25\baselineskip}
 
-\usepackage{natbib}
+\usepackage[square,sort,comma,numbers]{natbib} % use \usepackage[square,sort,comma,numbers]{natbib}  if numeric in-text citations are desired
 \bibliographystyle{$if(biblio-style)$$biblio-style$$else$plainnat$endif$}
 \usepackage[strings]{underscore} % protect underscores in most circumstances
 
