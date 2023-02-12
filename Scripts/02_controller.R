@@ -2,11 +2,12 @@
 library(rmarkdown)
 library(tidyverse)
 library(readxl)
+library(nlme)
 
 #Determine which scripts should be run
 process_data = F #Runs data analysis 
-make_report = T #Runs project summary
-
+make_report = F #Runs project summary
+knit_manuscript = T
 ############################
 ### Read in the RAW data ###
 ############################
@@ -31,6 +32,15 @@ surv_data = read_xlsx("Data/survival_test_corr.xlsx")%>%
 
 if(make_report == T){
   render(input = "Output/Reports/report.Rmd", #Input the path to your .Rmd file here
-         output_file = "report.html", #Name your file here; as it is, this line will create reports named with the date
-         output_format = "github_document")
+         output_file = "report", #Name your file here; as it is, this line will create reports named with the date
+         output_format = "all")
+}
+
+if(knit_manuscript == T){
+  render(input = "Manuscript/Holmes_Hackerd_etal_2023.Rmd", #Input the path to your .Rmd file here
+         output_file = paste("dev_draft_", Sys.Date(), sep = ""), #Name your file here; as it is, this line will create reports named with the date
+         #NOTE: Any file with the dev_ prefix in the Drafts directory will be ignored. Remove "dev_" if you want to include draft files in the GitHub repo
+         output_dir = "Output/Drafts/", #Set the path to the desired output directory here
+         output_format = "pdf_document",
+         clean = T)
 }

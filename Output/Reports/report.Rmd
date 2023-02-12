@@ -31,15 +31,31 @@ knitr::opts_chunk$set(
   dev = c("png", "pdf")
 )
 
-theme_mat = function(base_size){
-  ggpubr::theme_pubr(base_family="serif") %+replace% 
+theme_matt = function(base_size = 18,
+                      dark_text = "grey20"){
+  mid_text <-  monochromeR::generate_palette(dark_text, "go_lighter", n_colours = 5)[2]
+  light_text <-  monochromeR::generate_palette(dark_text, "go_lighter", n_colours = 5)[3]
+  
+  ggpubr::theme_pubr(base_family="sans") %+replace% 
     theme(
-      panel.background  = element_blank(),
+      panel.background  = element_rect(fill="transparent", colour=NA), 
       plot.background = element_rect(fill="transparent", colour=NA), 
       legend.background = element_rect(fill="transparent", colour=NA),
-      text = element_text(size = base_size)
+      legend.key = element_rect(fill="transparent", colour=NA),
+      text = element_text(colour = mid_text, lineheight = 1.1),
+      title = element_text(size = base_size * 1.5,
+                           colour = dark_text),
+      axis.text = element_text(size = base_size,
+                               colour = mid_text),
+      axis.title = element_text(size = base_size * 1.2,
+                                margin = margin(0, 8, 0, 0)),
+      legend.text = element_text(size=base_size * 0.9),
+      legend.title = element_text(size = base_size * 0.9, 
+                                  face = "bold"),
+      plot.margin = margin(0.25, 0.25, 0.25, 0.25,"cm")
     )
 }
+
 
 treatment_color_vector = c("control" = "lightskyblue",
                            "heatstress" = "tomato2")  #creates color vector
@@ -61,35 +77,25 @@ group_color_vector1 = c("Control" = "black",
 ```{r Making_Surv_Figs, include=TRUE}
 #Kaplan-Meier Analysis for survival, uses survminer package
 
-km_combined = survfit(Surv(death_day, status) ~ treatment, data = surv_data)
-
-summary(km_combined, times = c(1:16))
-
-S_Fig2 = ggsurvplot(
-  fit = survfit(Surv(death_day, status) ~ treatment, data = surv_data),
-  xlab = "Days", 
-  ylab = "Survival Proportion", 
-  title = "Kaplan-Meier Proportional Survival Estimates",
-  palette = c("lightskyblue", "tomato2"),
-  conf.int = TRUE, 
-  pval = FALSE,
-  ggtheme = theme_bw(base_size = 15, base_family="serif")+
-    theme(panel.grid = element_blank(),
-          axis.line.x.bottom = element_line(color = 'black'),
-          axis.line.y.left   = element_line(color = 'black'),
-          axis.line.y.right  = element_blank(),
-          axis.text.y.right  = element_blank(),
-          axis.ticks.y.right = element_blank(),
-          panel.border       = element_blank(),
-          legend.position = "none"
-    ))
-
-
-cox_model <- coxph(Surv(death_day, status) ~ treatment + replicate, data = surv_data)
-
-summary(cox_model)
-
-S_Fig3 = ggforest(cox_model, data = surv_data)
+# km_combined = survfit(Surv(death_day, status) ~ treatment, data = surv_data)
+# 
+# summary(km_combined, times = c(1:16))
+# 
+# S_Fig2 = ggsurvplot(
+#   fit = survfit(Surv(death_day, status) ~ treatment, data = surv_data),
+#   xlab = "Days", 
+#   ylab = "Survival Proportion", 
+#   title = "Kaplan-Meier Proportional Survival Estimates",
+#   palette = c("lightskyblue", "tomato2"),
+#   conf.int = TRUE, 
+#   pval = FALSE,
+#   ggtheme = theme_matt())
+# 
+# cox_model <- coxph(Surv(death_day, status) ~ treatment + replicate, data = surv_data)
+# 
+# summary(cox_model)
+# 
+# S_Fig3 = ggforest(cox_model, data = surv_data)
 ```
 
 # Figures
@@ -110,31 +116,15 @@ tolerance = mort_data %>%
 tpc = ggplot(mort_data, aes(x = stress_temp, y = survivorship)) +
   geom_segment(aes(x=18, xend=tolerance$LD50, y=0.5, yend=0.5)) +
   geom_segment(aes(x=tolerance$LD50, xend=tolerance$LD50, y=0, yend=0.5)) +
-  # geom_hline(yintercept = 0.5, size = 1, colour = "gray80") + 
-  # geom_vline(xintercept = tolerance$LD50) + 
   geom_point(position=position_jitter(width=0.2, height=0.02), 
              size=2, alpha = 0.5, colour = "black") + 
-  geom_smooth(method = "glm", se=T, method.args = list(family = "binomial"), size = 1.2, colour = "black") + 
+  geom_smooth(method = "glm", se=T, 
+              method.args = list(family = "binomial"), 
+              linewidth = 1.2, colour = "black") + 
   scale_y_continuous(breaks = c(0, 0.5, 1)) + 
   xlab("Stress Temperature (degrees C)") +
   ylab("Individual Survivorship") + 
-  labs(
-    tag = "(A)"
-  )+
-  theme_bw(base_size = 17, base_family = "serif") +
-  annotate("text", x=25, y=0.57,
-           label = "LD50 = 32.0 degrees C", 
-           col = "black", 
-           size = 8) +
-  theme(panel.grid = element_blank(),
-        axis.line.x.bottom = element_line(color = 'black'),
-        axis.line.y.left   = element_line(color = 'black'),
-        axis.line.y.right  = element_blank(),
-        axis.text.y.right  = element_blank(),
-        axis.ticks.y.right = element_blank(),
-        panel.border       = element_blank(),
-        legend.position = "none"
-  )
+  theme_matt()
 
 #Below creates the nauplii msr boxplot
 naup_resp = ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = factor(temp))) +
@@ -143,23 +133,14 @@ naup_resp = ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = facto
   labs(
     x = "Temperature (C)", 
     y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg Carbon)",
-    fill = "Temperature", 
-    tag = "(B)"
-  )+
-  scale_fill_manual(labels = c("18", "28"), values = c("lightskyblue", "tomato2"))+
-  # theme_mat()+
-  theme_bw(base_size = 17, base_family="serif")+
-  theme(panel.grid = element_blank(),
-        axis.line.x.bottom = element_line(color = 'black'),
-        axis.line.y.left   = element_line(color = 'black'),
-        axis.line.y.right  = element_blank(),
-        axis.text.y.right  = element_blank(),
-        axis.ticks.y.right = element_blank(),
-        panel.border       = element_blank(),
-        legend.position = "none"
-  )
+    fill = "Temperature")+
+  scale_x_continuous(breaks = c(18, 28)) + 
+  scale_fill_manual(labels = c("18", "28"), 
+                    values = c("lightskyblue", "tomato2"))+
+  theme_matt() +
+  theme(legend.position = "none")
 
-ggarrange(tpc, naup_resp, nrow = 1)
+ggarrange(tpc, naup_resp, nrow = 1, labels = "AUTO")
 ```
 
 ## Figure 2   
@@ -167,19 +148,22 @@ ggarrange(tpc, naup_resp, nrow = 1)
 axis_weights = c(400, 600, 800)
 break_weights = (axis_weights^2.92 * (1.11*10^-5))
 
-
 full_dataset %>% filter(group == "active")%>% drop_na(sex)%>%
   mutate(new_sex = ifelse(sex %in% c("man", "Male", "M", "MALE"), "Male", "Female")) %>%
   ggplot(aes(x=stage, y=length_um, fill=treatment)) +
   facet_grid(.~new_sex) +
   geom_boxplot(lwd=0.25, outlier.shape=NA) +
   geom_point(position = position_dodge(width=0.75), size=0.65) +
-  scale_y_continuous(sec.axis=sec_axis(~.^2.92 * (1.11*10^-5), name = "Mass (ng C)", breaks = round(break_weights, digits=0))) +
-  scale_fill_manual(labels = c("Control", "Heat Stress"), values = c("lightskyblue", "tomato2")) +
-  labs( x = "Copepodid Stage",
-        y = "Body Length (um)",
-        fill = "Experimental Group") +
-  theme_bw(base_size = 21, base_family="serif") +
+  scale_y_continuous(
+    sec.axis=sec_axis(~.^2.92 * (1.11*10^-5),
+                      name = "Mass (ng C)", 
+                      breaks = round(break_weights, digits=0))) +
+  scale_fill_manual(labels = c("Control", "Heat Stress"), 
+                    values = c("lightskyblue", "tomato2")) +
+  labs(x = "Copepodid Stage",
+       y = "Body Length (um)",
+       fill = "Experimental Group") +
+  theme_bw(base_size = 18) + 
   theme(panel.grid = element_blank())
 ```
 
@@ -208,37 +192,34 @@ temp_plot_data = plot_data %>%
 temp_df_resp = rbind(temp_naup_resp, temp_plot_data)
 temp_df_resp$stage = factor(temp_df_resp$stage, levels = c("n", "c1", "c2", "c3", "c4", "c5", "c6"))
 
-panel_labs = c("(a)", "(b)")
-
 #Per capita respiration plot
-resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h, fill = treatment, colour = treatment)) + 
+resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h, 
+                                     fill = treatment, colour = treatment)) + 
   geom_hline(yintercept = 0, size = 1) + 
   geom_boxplot(colour = "black", outlier.shape=NA) +
-  geom_point(position = position_dodge(width=0.75),color = "black", size=0.85) + 
-  theme_mat(base_size = 10) +
-  scale_fill_manual(labels = c("Control", "Heat Stress"), values = c("lightskyblue", "tomato2")) +
+  geom_point(position = position_dodge(width=0.75),
+             color = "black", size=0.85) + 
+  scale_fill_manual(labels = c("Control", "Heat Stress"), 
+                    values = c("lightskyblue", "tomato2")) +
   labs(x = "Copepodid Stage",
        y = " Per Capita Respiration \n (mL Oxygen/hour/individual)",
-       fill = "Experimental Group",
-       tag = "(A)") +
-  theme(text = element_text(size = 20, family = "serif")) 
+       fill = "Experimental Group") +
+  theme_matt() 
 
 #Mass-specific respiration plot
-mass_spec_plot = ggplot(temp_df_resp, aes(x = stage, y = mass_spec_resp, fill = treatment, colour = treatment)) + 
+mass_spec_plot = ggplot(temp_df_resp, aes(x = stage, y = mass_spec_resp, 
+                                          fill = treatment, colour = treatment)) + 
   geom_hline(yintercept = 0, size = 1) + 
-  geom_boxplot(colour = "black",outlier.shape=NA) +
+  geom_boxplot(colour = "black", outlier.shape=NA) +
   geom_point(position = position_dodge(width = 0.75), color = "black", size = 0.85) + 
-  theme_mat(base_size=10) + 
   scale_fill_manual(values = treatment_color_vector)+ 
   labs(x = "Copepodid Stage", 
        y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg C)",
-       fill = "Experimental Group",
-       tag = "(B)") +
-  theme(text = element_text(size = 20,
-                            family="serif"))
+       fill = "Experimental Group") +
+  theme_matt()
 
 #Combining the two plots into one figure
-ggarrange(resp_plot, mass_spec_plot, nrow = 1, common.legend = T) 
+ggarrange(resp_plot, mass_spec_plot, nrow = 1, common.legend = T, labels = "AUTO", legend = "bottom") 
 ```
 
 ## Figure 4   
@@ -257,25 +238,19 @@ dev_time_data = molt_record %>% filter(stage %in% c("c1","c6"))%>%
 
 xlabs = c("Control", "Heat Stress")
 
-
 ggplot(dev_time_data, aes(x=treatment, y=dev_time, fill=treatment)) +
   geom_boxplot(outlier.shape=NA) + 
-  geom_point(position=position_jitter(width=0.10, height=0.00), size = 1) +
+  geom_point(position=position_jitter(width=0.10, height=0.00), 
+             size = 2) +
   facet_grid(.~new_sex) +
-  scale_fill_manual(labels = c("Control", "Heat Stress"), values = c("lightskyblue", "tomato2")) +
+  scale_fill_manual(labels = c("Control", "Heat Stress"), 
+                    values = c("lightskyblue", "tomato2")) +
   labs(x = "Treatment",
        y = "Total Development Time from C1-C6 (days)",
        fill = "Experimental Group") +
-  theme_bw(base_size = 15, base_family="serif") +
-  theme(panel.grid = element_blank(),
-        axis.line.x.bottom = element_line(color = 'black'),
-        axis.line.y.left   = element_line(color = 'black'),
-        axis.line.y.right  = element_blank(),
-        axis.text.y.right  = element_blank(),
-        axis.ticks.y.right = element_blank(),
-        panel.border       = element_blank(),
-        legend.position = "none") +
-  scale_x_discrete(labels = xlabs)
+  scale_x_discrete(labels = xlabs) + 
+  theme_matt() + 
+  theme(legend.position = "none")
 ```
 
 ## Figure 5   
@@ -292,19 +267,11 @@ df1 = full_dataset %>%
 ggplot(aes(x= weight_mgC, y=mass_spec_resp), data=df1)+
   labs(x = "Mass (mg Carbon)",
        y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg Carbon)") +
+  geom_smooth(method = "lm", formula = (y~x)) +
   geom_point()+
   scale_x_log10()+
   scale_y_log10() +
-  geom_smooth(method = "lm", formula = (y~x)) +
-  theme_bw(base_size = 17, base_family="serif") +
-  theme(panel.grid = element_blank(),
-        axis.line.x.bottom = element_line(color = 'black'),
-        axis.line.y.left   = element_line(color = 'black'),
-        axis.line.y.right  = element_blank(),
-        axis.text.y.right  = element_blank(),
-        axis.ticks.y.right = element_blank(),
-        panel.border       = element_blank(),
-        legend.position = "none")
+  theme_matt()
 
 full_dataset$resp_nl_min_ind = (full_dataset$resp_mL_h * (1*10^6) ) / 60
 full_dataset$weight_mg = full_dataset$weight_ngC * (1*10^-6)
@@ -484,25 +451,19 @@ data_tidyd %>%
        colour = "Vial Type") +
   geom_point(size = 1) + 
   theme(panel.grid = element_blank())+
-  geom_smooth(method = "lm") +
-  theme_bw(base_size = 17, base_family="serif")+
-  theme(panel.grid = element_blank(),
-        axis.line.x.bottom = element_line(color = 'black'),
-        axis.line.y.left   = element_line(color = 'black'),
-        axis.line.y.right  = element_blank(),
-        axis.text.y.right  = element_blank(),
-        axis.ticks.y.right = element_blank(),
-        panel.border       = element_blank())
+  geom_smooth(method = "lm") + 
+  theme_matt()
+  
 ```
 
 ## Supp. Figure 2   
 ```{r S_Fig2, include=TRUE, fig.width=7, fig.height=6}
-S_Fig2
+#S_Fig2
 ```
 
 ## Supp. Figure 3   
 ```{r S_Fig3, include = TRUE, fig.width=7, fig.height=6}
-S_Fig3
+#S_Fig3
 ```
 
 ## Supp. Table 1    
@@ -586,3 +547,7 @@ dth_m.3 <- update(dth_m0, weights = varIdent(form = ~1|sex*treatment))
 #summary(dth_m.3)
 kable(car::Anova(dth_m.3, test="F", type = 3))
 ```
+
+
+
+

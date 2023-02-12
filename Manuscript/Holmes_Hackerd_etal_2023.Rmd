@@ -1,0 +1,489 @@
+---
+output: 
+  pdf_document:
+    template: preprint_template.tex
+    fig_caption: true
+    keep_tex: false
+    citation_package: natbib
+  word_document: 
+    reference_docx: doc_template.docx
+title: "Naupliar exposure to acute warming shows no carryover ontogenetic effects on respiration, body size, or development time in the cosmopolitan copepod *Acartia tonsa*"
+author:
+  - name: Mathew Holmes-Hackerd
+    affiliation: Department of Maine Sciences, University of Connecticut
+    location: 
+  - name: Matthew Sasaki
+    affiliation: Department of Maine Sciences, University of Connecticut
+    location: 
+  - name: Hans G. Dam
+    affiliation: Department of Maine Sciences, University of Connecticut
+    location: 
+abstract: "Short-term, acute warming events are increasing in frequency in across the world’s oceans. In short-lived species like most copepods, the duration of these events can bridge within- and between-generational time scales. Yet, it is unclear whether exposure to acute warming during early life stages of copepods causes carryover effects on metabolism through development, which could reduce the amount of energy devoted to growth and affect copepod population dynamics. We exposed nauplii of an ecologically important coastal species, Acartia tonsa, to a 24-hour warming event (control: 18°C; treatment: 28°C), and then tracked individual respiration rate and body length across development, along with the duration of each developmental stage. As expected, we observed a decrease in mass-specific respiration rates as individuals developed. However, exposure to acute warming had no effect on the ontogenetic patterns in per-capita or mass-specific respiration rates, body length, or development time. The lack of these carryover effects through ontogeny suggests within-generational resilience to acute warming in this copepod species."
+keywords: 
+contact: "**Correspondance**: matthew.sasaki@uconn.edu" 
+current: "This preprint is current as of `r format(Sys.time(), '%B %d, %Y')`"
+repo: "**Code**: https://github.com/ZoopEcoEvo/resp_through_dev"
+bibliography: references.bib
+biblio-style: bib-style
+geometry: margin=1in
+fontsize: 10pt
+graphics: yes
+header-includes: 
+  \usepackage{caption}    
+  \captionsetup[figure]{font=small, margin=20pt, justification=centering}
+  \captionsetup[table]{font=small, margin=20pt, justification=centering}
+  \usepackage{float} \floatplacement{figure}{H} 
+  \newcommand{\beginsupplement}{\setcounter{table}{0}  \renewcommand{\thetable}{S\arabic{table}} \setcounter{figure}{0} \renewcommand{\thefigure}{S\arabic{figure}}}
+---
+
+# Introduction
+
+Copepods are globally distributed and ecologically important in the marine plankton. As primary consumers, copepods represent a crucial link between primary producers and higher trophic levels. As the primary food source for forage fish, copepods have a direct effect on fisheries recruitment [1,2]. Furthermore, copepods are arguably the most abundant pelagic animals [3] and dominate zooplanktonic biomass. Through their production of carbon- and nutrient-rich fecal pellets, and their diel vertical migration, copepods accelerate vertical transport of particulate and dissolved matter into deeper waters [4,5]. Altogether, copepods play a vital role in global carbon and nutrient cycling. A robust understanding of how copepods are affected by increasing temperature is a crucial component of predictions about their various roles under future climate scenarios.
+
+Organismal responses to climate stressors can be broadly separated into two categories: across-generation (evolutionary change) and within-generation (individual variation and phenotypic plasticity). These timescales are intertwined, however, with the latter providing the raw material for evolutionary change [6,7]. Fine-scale observations of within-generation responses to shifts in environmental conditions can, therefore, provide important insights into both the vulnerability and resilience of populations to climate change. Anthropogenic climate change is predicted to cause a rise in ocean temperatures of \~1.5°C over the next 20 years [8], which may have a variety of adverse effects on marine taxa. Perhaps most impacted by this warming will be small ectotherms [9,10]. In addition to rising average temperatures, short-term heat events (e.g. - marine heat waves) are increasing in intensity, duration, and frequency [11, 12]. Increases in temperature over these shorter timescales pose challenges to organisms that are unique from those presented by the long-term increase in average temperature; namely, the increase in temperature is often more extreme and may occur over within-generation time scales, even in short-lived marine organisms. Given the potentially short timescale of these events, a population's initial response to acute warming is likely to be driven by phenotypic plasticity. Importantly, there may also be variation in individual responses, due to standing genetic diversity within populations. This individual-level variation may shape the impact of increased temperatures on population persistence over short timescales. Outside of low latitudes, most copepods appear to maintain large buffers between environmental and lethal temperatures [13]. As such, understanding how acute sub-lethal exposure to warming affects copepod performance traits is necessary to help predict population dynamics as these events become more frequent. It is also important to separate the effects of acute events from chronic exposure, especially in taxa like copepods where the duration of exposure may extend across developmental stages.
+
+Temperature is known to have strong effects on copepod life history traits [14,15,16]. For example, temperature alone was found to explain \>90% of the variance in growth rates of copepods collected from environments ranging from -1.7 to 30.7°C [15]. Similar dependence on temperature is found in other copepod life history traits such as egg production [17] and ingestion rates [18,19]. Copepod metabolism is also highly temperature sensitive [16]. Broadly, metabolism is understood as the sum of all chemical reactions that occur within a living organism because it entails the rate of energy uptake, transformation, and allocation [20]. Metabolism is a key bioenergetics function that provides insight into the control of individual growth [21,22].
+
+Aerobic respiration rates are often used as a proxy for metabolic rates because almost all oxygen consumption is used to support energy production. By focusing on the relationship between temperature and copepod respiration we may therefore obtain an understanding of temperature effects on copepod metabolism and performance at the whole organism level. Copepod metabolic rates tend to increase with increasing temperature [23, 24]. At high temperatures, additional increases in metabolic rates may stem from the energetic costs associated with mounting the heat shock response [25]. For instance, effects of exposure to elevated temperatures can be buffered by an increase in intracellular concentrations of heat-shock proteins [26]. This may persist, with carryover effects on copepod metabolism, even after the exposure has ended - the upregulation of heat shock protein gene expression in adult *Acartia tonsa*, for example, can persist for up to 30 hours past the warming event [27]. The metabolic implications of this response strategy remain unexplored.
+
+Respiration rate is also often related to body size. Per capita respiration rate, R, scales to body mass, M, as: R=aM3/4 [28]. Hence, the weight-specific respiration rate, R/M, decreases with increasing body mass. This pattern holds for copepods [29,30], with some caveats: the pattern accurately describes copepodid, but not naupliar, stages [31]. Despite large relative changes in mass through the six naupliar stages, mass-specific respiration remains relatively constant [31]. This deviates from the expectation of decreasing mass-specific respiration as the nauplii grow. Furthermore, a large increase in metabolism between the final naupliar stages and first copepodid stage has been observed [31], which is again counter to the expectation that mass-specific respiration rate should decrease with increased mass. The stark metabolic differences between copepod life stages suggest there may also be differences in the response to elevated temperature. Generally, early life stages of marine organisms are less tolerant to elevated temperature and thus may act as demographic 'bottlenecks' for populations in response to acute warming events (although this is not universal, and copepod nauplii may be more resistant; [32]). Quantifying the effects of exposure to warming during the naupliar stages on ontogenetic changes in respiration in individual copepods may provide insight into how copepod populations may respond to the increasing threat of short-term sublethal warming events.
+
+The goals of this study are to test the resilience of copepods to acute warming experienced during the naupliar stages, and to quantify potential carryover effects of short-term sublethal warming. We used high sensitivity respirometry to measure individual respiration rates of the calanoid copepod, *Acartia tonsa*, throughout development in response to an initial naupliar warming treatment; thus, providing a fine-scale perspective on the effects of warming exposure on copepod metabolism through development. The temperature treatment used was an increase of +10°C relative to rearing temperature for 24 hours. This timescale was much shorter than the conventional definition of marine heat waves because we were interested specifically in the effects of acute warming; a longer timescale exposure would introduce potential confounding effects of temperature on growth rates (as naupliar stages progress near daily). We hypothesized that naupliar warming treatment would lead to (i) higher energetic requirements and thus higher respiration rates during the subsequent copepodid stages, (ii) delayed development, with warming exposed individuals taking longer to progress through copepodid stages, and (iii) reduced body length across copepodid stages following the naupliar warming treatment. Ultimately, we found that exposure to acute warming in the naupliar stages did not affect any of the three variables measured, suggesting that *Acartia tonsa* nauplii are resilient to short-term warming events, and that effects of extended or repeated exposure may be of greater concern.
+
+# Methods
+
+## Experimental Organisms
+
+*Acartia tonsa* nauplii were obtained from a laboratory culture initially collected in July 2021 at Esker Point, Groton, CT, USA (41.3209°N, 71.9996°W). The culture was maintained in an 11-liter container at 18°C in a temperature controlled environmental chamber under a 12:12 light:dark cycle. A small aquarium pump was used to ensure constant aeration of the culture. The culture was regularly fed ad-libitum a mixture of Tetraselmis sp., Rhodomonas sp., and Thalassiosira weissflogii, as used in previous studies [33]. Phytoplankton cultures were grown in F/2 medium and kept in the exponential growth phase under the same light and temperature conditions as the copepods.
+
+## Temperature selection and naupliar respiration rates
+
+Nauplii were exposed to a 28°C warming treatment at the initiation of the experiments. Preliminary experiments showed that this temperature did not exceed naupliar thermal tolerance while still inducing a strong metabolic response, indicating an impactful but sub-lethal heat challenge (Fig 1b). The naupliar survivorship curve was generated following methods previously used for adult *A. tonsa* [33], with individual nauplii survivorship measured after a 24-hour exposure to a range of temperatures. A logistic regression was fit to this individual survivorship data to generate the thermal survivorship curve, which was used to estimate thermal tolerance (LD50, the temperature inducing 50% mortality). Respiration rate was estimated as the rate of oxygen depletion over time (see Respiration analysis below for further details). Oxygen measurements were taken using a Presens® oxygen sensor system, which previous studies have used to measure respiration rates of copepod nauplii [34]. In brief, the system uses airtight 2.8 mL vials in a dish atop an optical reader. Each vial contains a sensor spot made of oxygen-sensitive foil with an immobilized fluorescent dye along the base. These optical sensors measure oxygen concentration within the vial at discrete time intervals. Here we used 3-minute intervals to minimize the slight temperature fluctuations caused by the optical measurements. Naupliar respiration rates were measured for 8 hours in a standing incubator with no light. Three replicate 8-hour trails were conducted at both 18°C and 28°C. Each replicate included 10 vials containing 15 nauplii each and 2 control vials with no nauplii.
+
+## Experimental design
+
+Three replicate experiments were performed to test the effect of exposure to acute warming in the naupliar stages through subsequent developmental stages. To initiate each replicate \~200 newly hatched nauplii were isolated from the laboratory culture and evenly split into six 50 mL centrifuge tubes filled with 30 mL of replete food solution (800 µg C/L; 400 µg C/L each of Tetraselmis sp. and Rhodomonas sp.) These six tubes were randomly assigned to either control (18°C) or heat treatment (28°C) groups (n = 3 tubes per heat treatment per experiment). Each tube was loosely capped and placed into a dry heat bath (Thermo Scientific Digital Drybath, Cat# 88870003) and maintained at the assigned temperature treatment for 24- hours.
+
+Following the 24-hour exposure period, 30-40 nauplii were randomly selected from across the tubes (n = 15-20 per treatment) and placed in individual 20 mL petri dishes with replete food solution to monitor development. Petri dishes had been previously cured by soaking in filtered sea water for 7 days with daily seawater replenishment. A subset of these dishes (n = 5-10 each treatment) was randomly selected and assigned to a handling control treatment. Handling controls were monitored daily (see Daily monitoring and trait measurements) but trait measurements were not made until the C6 stage, allowing us to examine potential handling effects on experimental copepods, which were measured and handled more regularly (see Daily monitoring and trait measurements). These experiments were blinded, with the treatment assignment process randomized and petri dish labels free of any indication of which treatment (control or warming treatment) the individual was exposed to.
+
+## Daily monitoring and trait measurements
+
+Each petri dish was checked using a dissection microscope every 24 hours for copepod survival. Light intensity was kept at the lowest possible level to visualize the copepod while minimizing potential light stress. Each surviving individual was carefully transferred into another cured and labeled 20 mL petri dish containing 10 mL fresh replete food solution. Its previous dish and solution were checked for shed molts to determine if or when the individual had progressed to the next development stage and to estimate stage duration (days).
+
+Each individual's respiration was measured once per developmental stage immediately following a molt being found (see Copepodid respiration rates). Following respirometry, the copepodid was photographed using an inverted microscope (again under minimum light exposure) and transferred back to its individual petri dish. Body lengths were estimated from the photographs using ImageJ [35] and then converted into carbon mass (ng C) using an empirical relationship between mass and length [36].
+
+## Copepodid respiration rates
+
+Respiration rates of the six copepodite stages (C1-C6) were measured using the same Presens® system used to assess naupliar respiration. For copepodid measurements, single individuals were placed in each vial with the same ad libitum food solution (800 µg C/L evenly split between Tetraselmis sp. and Rhodomonas sp.) to prevent starvation effects on respiration rates [36,37]. All respiration measurements were made over 8 hours at 18°C in the dark using a standing incubator. Special care was taken to remove all air bubbles from the vials as their presence interferes with the sensor's capability to accurately measure oxygen concentration.
+
+# Respiration analysis
+
+Respiration rates were calculated from the time-dependent oxygen concentrations in the vials using the R statistical and computing software environment (version 4.1.3; [38]) and the respR package (version 2.0.2; [39]). Respiration rates were calculated against two or three control vials filled with the replete food solution but without a copepod, to account for background changes in oxygen concentration. Respiration rate was then calculated as the slope of oxygen concentration against time, derived from a linear regression. Oxygen depletion within the control vials was negligible in comparison to the depletion within vials containing a copepod, and thus any potential changes in phytoplankton cell abundance due to grazing during the incubation period were not considered (S1 Fig). The first 350 minutes of oxygen measurements were excluded from the regression analyses because of curvature in the oxygen profiles, likely produced while the oxygen sensor spot became saturated or during temperature acclimation between the laboratory space and standing incubator. Excluding this initial time period ensured linearity of the oxygen drawdown, confirmed by visual inspection of the oxygen traces, which is necessary because calculation of respiration rates assumes linear drawdown. The estimated body mass of each copepodid (ng carbon) was used to calculate mass-specific respiration rates (mL oxygen/ hour/ mg carbon).
+
+## Hypothesis testing
+
+To test for differences in survival through development between treatment and control groups a Kaplan-Meier survival analysis was conducted. To further explore potential effects of treatment and experimental replicate on survival a Cox proportional hazard model was applied to the data. Separate linear mixed effects models were used to test the effect of the naupliar warming treatment on copepodid traits (size, respiration rate, and total development time) and whether treatment effects depended on sex and life stage. These models included experimental replicate (n = 3) and, within each replicate, the copepod individual as random effects. For copepodid development time (days from C1 to C6), a linear model was used with fixed effects of sex and naupliar warming treatment and random effect of experimental replicate. To test for handling artifacts on the three variables, the respiration rates and body size of handling controls at C6 were compared to the C6 measurements of the serially measured individuals. Copepodid development time was also compared between actively handled and handling control individuals. Post-hoc comparisons of estimated marginal means from mixed effect models were used to test specific differences between groups and explore significant interactions ('emmeans' R package, v 1.7.5; [40]). Model assumptions were validated by visually inspecting residual and normal-quantile plots. Several models included a weighted variance structure to account for unequal variances among treatment groups according to Zuur et al, (2009) [41] using the R package 'nlme' (version 3.1-160; [42]).
+
+# Results
+
+Nauplii had a thermal tolerance value (measured as LD50) of 32°C (Fig 1a). Naupliar respiration rates increased when exposed to 28°C (treatment) compared to 18°C (control) (treatment: 1.04±0.06, control: 0.29±0.002 mL O2/hour/individual (mean±S.E.); Fig 1b). This difference in respiration rates yielded a Q10 of 3.6, which is greater than typically published estimates of copepod respiration (Q10 = 1.8-2.1; [16,43]) consistent with the idea that the warming temperature chosen induced a strong metabolic response but was not lethal to the nauplii.
+
+```{r, figure1, echo = F, out.width = "400px"}
+#| fig.cap = "Nauplii thermal survivorship and mass-specific respiration rates. (A) Survivorship curve used to estimate naupliar thermal tolerance. Individual survivorship was determined after 24 hours exposed to a range of temperatures. A logistic regression was fit to this data to estimate the survivorship curve and LD50, the temperature inducing 50percent mortality. (B) Box plot of mass-specific respiration rates (mL O2/hour/mg carbon) of nauplii at 18°C and 28°C. Sample size for both temperatures are 30 measurements per temperature. Measurements occurred for 8 hours, nauplii were reared in 18°C and not acclimated to 28°C ahead of time. The box plot reports median value (black line), interquartile range (colored range). Component respiration rate measurements are shown as individual points."
+
+knitr::include_graphics("../Output/Figures/Markdown/Fig1-1.pdf") #Use this when filling in figures from analysis 
+```
+
+Body length increased through development in both treatment and control copepodids (Fig 2). Individual females grew from 0.33±0.002 mm in C1 to 0.85±0.007 mm in C6, and males grew from 0.35±0.005 mm in C1 to 0.76±0.006 mm in C6 (mean±S.E.). Per capita respiration also increased throughout development (Fig 3a), ranging by a factor of four from C1 to C6. As expected, body length (and thus calculated mass) increased at a higher rate than respiration as copepods developed, resulting in a decrease in mass-specific respiration throughout development (Fig 3b). Survival in both groups was high (S2 Fig), with 80% (control) and 63% (treatment) of individuals reaching maturity, with no significant effect of treatment on survival (Kaplan-Meier test p=0.21, Cox hazard ratio p=0.228; S2 Fig, S3 Fig). Survival was the same in all three experimental replicates (replicate 1 vs. 2 p=0.283, replicate 1 vs. 3 p=0.407, S4 Fig).
+
+```{r, figure2, echo = F, out.width = "400px"}
+#| fig.cap = "Stage specific body lengths of male and female *Acartia tonsa* copepodids. Body lengths (mm) for individuals from each experimental group at the various copepodid stages. Different treatments are indicated by fill color.  Individual body size measurements are shown as points. Box plot components as in Fig 1B."
+
+knitr::include_graphics("../Output/Figures/Markdown/Fig2-1.pdf") #Use this when filling in figures from analysis 
+```
+
+```{r, figure3, echo = F, out.width = "400px"}
+#| fig.cap = "Per capita and mass-specific respiration rates of *Acartia tonsa*. (A) Per capita respiration rates (mL O2/hour/ind.) of pooled nauplii (n) and individual copepodid stages (C1-C6). (B) Mass-specific respiration rates (mL O2/hour/mg carbon) of pooled nauplii and copepodid stages. Different treatments are indicated by different fill colors. Individual respiration rate measurements are shown as individual points. Boxplot components as describes in Fig 1B."
+
+knitr::include_graphics("../Output/Figures/Markdown/Fig3-1.pdf") #Use this when filling in figures from analysis 
+```
+
+In contrast to the strong effects of copepodid stage on measured traits, we found no indication of an effect of naupliar warming treatment on mass-specific respiration rates (p=0.7166, Table 1), body size (p=0.1316, Table 2), or development time (p=0.1943, Table 3). Our first hypothesis that naupliar exposure to warming would cause increased mass-specific respiration rates was tested using a linear mixed effect model, which indicated that mass-specific respiration rates varied between development stages (p\<0.0001), but not between sexes or experimental group (Table 1). Our second hypothesis that, relative to control individuals, body lengths would decrease after naupliar warming exposure was also not supported. The linear mixed effect model for this hypothesis showed that body length varied between stages (p\<0.0001) and sexes (p\<0.0001), but not between treatment groups (Table 2). Post hoc tests show males were larger than females in C1 (p=0.0120, S1 Table), both sexes were the same size in C2-C4, and females were larger in C5 and C6 (both p \< 0.001, S1 Table). Finally, the third hypothesis, that total development time would increase in response to naupliar warming treatment, was also not supported (Fig 4, Table 3); however, development time was sex-dependent, with males developing faster (p\<0.0001, Table 3).
+
+```{r, table1, echo = F}
+
+table1_data = full_dataset %>% 
+  filter(mass_spec_resp >= 0, group == "active") %>%
+  drop_na(sex)
+
+#Makes all relevant data a factor
+table1_data$replicate <- as.factor(table1_data$replicate)
+table1_data$id <- as.factor(table1_data$id)
+table1_data$treatment <- as.factor(table1_data$treatment)
+table1_data$stage <- as.factor(table1_data$stage)
+table1_data$sex <- as.factor(table1_data$sex)
+table1_data$body_length <- as.factor(table1_data$body_length)
+
+#MUST SET THESE OPTIONS BEFORE RUNNING THE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+#All possible model comparisons
+msr_m0 <- lme(mass_spec_resp ~ stage * sex* treatment, random = ~1|replicate/id,data = table1_data)
+msr_m.1 <- update(msr_m0, weights = varIdent(form = ~1|stage))
+msr_m.2 <- update(msr_m0, weights = varIdent(form = ~1|sex))
+msr_m.3 <- update(msr_m0, weights = varIdent(form = ~1|treatment))
+msr_m.4 <- update(msr_m0, weights = varIdent(form = ~1|stage*sex))
+msr_m.5 <- update(msr_m0, weights = varIdent(form = ~1|sex*treatment))
+msr_m.6 <- update(msr_m0, weights = varIdent(form = ~1|stage*treatment))
+msr_m.7 <- update(msr_m0, weights = varIdent(form = ~1|stage*sex*treatment))
+
+#Comparison of models
+#anova(msr_m0,msr_m.1, msr_m.2, msr_m.3, msr_m.4, msr_m.5, msr_m.6, msr_m.7)
+
+#Residual plot
+#plot(msr_m.6)
+#m.6.e <- resid(msr_m.6, type = 'pearson')
+
+#Q-Q plot
+#qqnorm(m.6.e); qqline(m.6.e, col = 2)
+
+#Summary and stats of selected model
+#summary(msr_m.6)
+knitr::kable(car::Anova(msr_m.6, test="F", type = 3), 
+             digits = 3, align = "c",
+             caption = "Summary of results from a linear mixed effects model testing the effects of naupliar warming exposure on mass-specific respiration rates. Warming treatment, sex, and copepodid stage and their interactions were included in the model as fixed effects, while experiment replicate and individual copepod were included in the model as random effects.")
+```
+
+```{r, table2, echo = F}
+table2_data = full_dataset %>% 
+  filter(mass_spec_resp >= 0, group == "active") %>%
+  drop_na(body_length)%>%
+  drop_na(sex) 
+
+#RUN THESE OPTIONS BEFORE THE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+#All possible model comparisons
+bl_m0 <- lme(body_length ~ stage * sex * treatment, random = ~1|replicate/id, data = table2_data, control =list(msMaxIter = 1000, msMaxEval = 1000))
+bl_m.1 <- update(bl_m0, weights = varIdent(form = ~1|stage))
+bl_m.2 <- update(bl_m0, weights = varIdent(form = ~1|sex))
+bl_m.3 <- update(bl_m0, weights = varIdent(form = ~1|treatment))
+bl_m.4 <- update(bl_m0, weights = varIdent(form = ~1|stage*sex))
+bl_m.5 <- update(bl_m0, weights = varIdent(form = ~1|sex*treatment))
+bl_m.6 <- update(bl_m0, weights = varIdent(form = ~1|stage*treatment))
+bl_m.7 <- update(bl_m0, weights = varIdent(form = ~1|stage*sex*treatment))
+
+#Comparison of models
+#anova(bl_m0,bl_m.1, bl_m.2, bl_m.3, bl_m.4, bl_m.5, bl_m.6, bl_m.7)
+
+#Residual plot
+#plot(bl_m.6)
+#m.6.e <- resid(bl_m.6, type = 'pearson')
+
+#Q-Q plot
+#qqnorm(m.6.e); qqline(m.6.e, col = 2)
+
+#Summary and stats of selected model
+#summary(bl_m.6)
+knitr::kable(car::Anova(bl_m.6, test="F", type = 3), 
+             digits = 3, align = "c",
+             caption = "Summary of results from a linear mixed effects model testing effects of naupliar warming exposure on body lengths. Warming treatment, sex, and copepodid stage and their interactions were included in the model as fixed effects, while experimental replicate and individual copepods were included in the model as random effects.")
+```
+
+```{r, table3, echo = F}
+dev_time_data = molt_record %>% 
+  filter(stage %in% c("c1","c6")) %>%
+  group_by(id, stage)%>%
+  filter(date == min(date), group == "active") %>%
+  ungroup(stage) %>%
+  mutate("dev_time" = lead(days) - days) %>%
+  drop_na("dev_time", "sex") %>%
+  dplyr::select(-stage,-days) %>%
+  separate(id, c("replicate", "id_original"), sep = "_", remove=F) %>%
+  mutate(new_sex = ifelse(sex %in% c("man", "Male", "M", "MALE"), "Male", "Female")) 
+
+#RUN THESE OPTIONS BEFORE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+#All model comparisons 
+dt_m0 <- lme(dev_time ~ sex * treatment, random = ~1|replicate/id,data = dev_time_data, control = lmeControl(opt = "optim"))
+dt_m.1 <- update(dt_m0, weights = varIdent(form = ~1|sex))
+dt_m.2 <- update(dt_m0, weights = varIdent(form = ~1|treatment))
+dt_m.3 <- update(dt_m0, weights = varIdent(form = ~1|sex*treatment))
+
+#Comparisons of models built
+#anova(dt_m0,dt_m.1, dt_m.2, dt_m.3)
+
+#Residual plot
+#plot(dt_m.3)
+#m.3.e <- resid(dt_m.3, type = 'pearson')
+#Q-Q plot
+#qqnorm(m.3.e); qqline(m.3.e, col = 2)
+
+#Summary and stats of selected model
+#summary(dt_m.3)
+knitr::kable(car::Anova(dt_m.3, test="F", type = 3), 
+             digits = 3, align = "c",
+             caption = "Summary of results from a linear mixed effects model testing effects of naupliar warming exposure on copepodid development time. Warming treatment and sex and their interactions were included in the model as fixed effects, while experimental replicate and individual copepod were included in the model as random effects.")
+```
+
+```{r, figure4, echo = F, out.width = "400px"}
+#| fig.cap = "Copepodid development time of male and female *Acartia tonsa*. Boxplot of total copepodid development time from C1-C6 between experimental groups for both sexes. Box plot components as in Fig 1."
+
+knitr::include_graphics("../Output/Figures/Markdown/Fig4-1.pdf") #Use this when filling in figures from analysis 
+```
+
+Handling controls were used to explore potential effects of re-occurring experimental handling on respiration and body length. All comparisons between handling groups were for C6 individuals, as neither respiration rates nor body lengths were measured in the intermediate copepodid stages in the handling controls. Three-way ANOVAs indicated no effect of handling on mass-specific respiration rates (p = 0.295, S2 Table), body lengths (p = 0.276, S3 Table), and copepodid development time (p = 0.092, S4 Table).
+
+In summary, copepod respiration increased through development as did body length. Respiration rates increased at a slower rate than mass leading to decreasing mass-specific respiration rates through development. Females progressed through copepodid stages more slowly than males but ultimately reached a larger size. Neither the naupliar warming exposure nor experimental handling had an effect on mass-specific respiration rates, body size, or copepodid development time.
+
+# Discussion
+
+Exposure to sublethal warming can have various effects on copepods that linger past the stress event itself. Carryover effects are important to understand because they represent an increased energetic reallocation toward mediation of the stress and away from growth than estimated by just monitoring organismal performance during a stress event. By measuring and tracking individual copepods through their development we were able to explore potential effects of acute naupliar exposure to warming on ontogenetic patterns in metabolism and body size. In general, these ontogenetic patterns conformed to expectations, with the relative increase in respiration being less than that of body length, leading to an inverse relationship between mass-specific respiration and copepodid stage. Differences between sexes were observed for body size and development time, but not for mass-specific respiration rates. Interestingly, the naupliar warming exposure used here (+10°C for 24 hours) did not affect subsequent respiration rate, body size, or development time, suggesting that *Acartia tonsa* development is resilient to intense but sub-lethal warming exposure.
+
+With no observable difference in respiration through ontogeny between the treatment and the control, our results suggest that there was no effect of acute warming in the naupliar stage on subsequent energy demand. We expected that the observed hardening tactic of upregulating heat shock proteins under increased temperature exposure in *Acartia tonsa* [44] would manifest as a shift in metabolic processes that would be sustained throughout development. We also hypothesized that production of heat shock proteins would divert energy from growth (decreasing body size) or development (increasing stage durations). While we did not measure heat shock protein production, past works show the high capacity for production and upregulation of heat shock proteins in response to temperature exposure in *Acartia tonsa* [26].
+
+The lack of carryover effects of warming exposure on copepodids was surprising given the strong metabolic response of nauplii to the selected high temperature treatment. There are three plausible explanations for these results. First, carryover effects manifested in unmeasured life history traits such as adult survivorship and life span; in this case, carryover effects are unlikely to manifest in sex-specific trait such as reproductive investment (e.g. -- egg production) because there was no difference in the effect of high temperature exposure between males and females. A second possible explanation is compensatory feeding. Individuals were provided with food at replete levels both during and after exposure to high temperatures. However, while compensatory feeding during the copepodid stages may have reduced effects of exposure to the warming treatment on body size and development time, it would likely not have masked potential effects on respiration rate. Any treatment-induced changes in energetic demand may have been compensated for by increased feeding rates in the naupliar stages before molting to C1, however, when respiration measurements were started. Acartia species are known to exhibit compensatory feeding in response to reduced nutritional value of prey [45] and salinity shock [46]. Furthermore, the effects of environmental stressors such as combined warming and acidification are weaker at higher food levels [47]. The third explanation is that *Acartia tonsa* nauplii may have high constitutive expression of heat shock proteins to accommodate the large changes associated with rapid growth, molting, and metamorphosis. Constitutively high expression levels of heat shock proteins during the naupliar stage would not only prime individuals to respond to an acute shock, but would also reduce the relative energetic costs associated with mounting the heat shock response in warming exposed nauplii relative to the controls. Strong evidence shows upregulation of heat shock proteins in *A. tonsa* adults and eggs [26,48], but we are not aware of any work that has explored this capacity for nauplii.
+
+The comparison between warming treatment and control nauplii was the primary objective of this project. The second novel contribution of this work, however, is documenting the ontogenetic patterns in respiration, with measurements made on the same individuals at multiple stages through development. This contrasts with the bulk respiration measurements on different individuals at different developmental stages that have been used previously to describe these patterns [31, 36]. By tracking respiration across development, we are able to account for potential differences in developmental patterns between individuals. The usefulness of this approach is apparent when comparing the mass (mg C) vs. mass-specific respiration (mL O2/hour/mg C) of individuals across development. The average slope of this relationship was -0.43 ±0.06 (mean ± SE, n=38) but, between individuals, this slope ranged from -1.17 to 0.56. The wide range of observed slopes reinforces how individual-scale respiration measurements are necessary to account for these differences in response to warming exposure. This is especially important when warming events occur on a within-generational time scale, as population responses will be shaped by the magnitude of individual variation in temperature sensitivity, and highlights that broad patterns may not be predictive of populations dynamics over shorter timescales [24].
+
+The ¾ power law has long been applied to describe the inverse relationship between respiration and body mass of animals (R=aM^3/4^; [28]). While this is typically examined in the context of across-taxa differences, a similar pattern plays out during development when respiration increases at a slower rate than mass [49]. In this mass-specific case, the expected exponential value is -0.25 [28]. We found an exponential value of -0.45 (r^2^=0.32, p\<0.0001), which suggests that weight-specific respiration rate decreased faster with mass in our study than generally observed (Fig 5). Despite the considerable uncertainty in the explained variance in this relationship, a comparison of ontogenetic patterns in respiration will still be useful to identify how the methodology used here compares to previous work. Yet, comparison among studies is often difficult as respiration rate units vary in both scale (per minute, per hour, per day) and unit (O2/individual, /unit dry weight, /unit carbon). Additionally, studies in which length is used to estimate weight of individuals often use different conversion factors, making direct comparisons impossible [31,37]. Hence, here we emphasize the comparison of patterns through ontogeny while understanding that specific respiration rate measurements are highly variable to the specific parameters and organisms tested.
+
+```{r, figure5, echo = F, out.width = "400px"}
+#| fig.cap = "Relationship between mass-specific respiration (mL Oxygen/hour/mg carbon) and copdpodid mass (mg Carbon). Scatter plot of log10 mass-specific respiration (mL O2/hour/ng carbon) against mass (mg carbon). Log regression line is described by y=x-0.45, r2=0.31, p < 2.2 x 10-16, n=262."
+
+knitr::include_graphics("../Output/Figures/Markdown/Fig5-1.pdf") #Use this when filling in figures from analysis 
+```
+
+The first component of ontogenetic patterns in respiration to compare is the increase in mass-specific respiration from naupliar to copepodid stages. Previous work has demonstrated a large metabolic increase from the naupliar to copepodid stages [31]. We also observed an increase in mass-specific respiration between naupliar and C1 copepodid stages, which is consistent with the observations of Epp & Lewis (1980) [31] on a tropical freshwater calanoid (*Notodiaptomus venezolanus*). Because of the differences in species and environments, respiration rate comparisons between these studies seem unwarranted. A direct rate comparison of per capita respiration is possible, however, with a study on *Acartia tonsa* respiration rates in response to starvation [37]. This study used a flow-through respirometry technique with 5 adult females per measurement, and found non-starved adult females (C6) respired 0.95±0.17 nL O2 individual-1 min-1 (mean±S.E.). This is much smaller than our observed value of 7.75±0.44 nL O2 individual-1 min-1 (mean±S.E.) for adult females at 18°C. Although the copepods being compared here are both *Acartia tonsa*, this comparison does not account for differences in body mass (as the rates compared are per capita and not mass-specific respiration). Furthermore, past works show that *Acartia tonsa* from the Baltic region (as used in the previous study; [37]) are generally deeply genetically diverged from *Acartia tonsa* lineages commonly found in the Western Atlantic and thus there may be differences in baseline metabolic rates between population which this comparison cannot account for [50,51]. While direct comparisons remain difficult due to a variety of factors that cannot be fully accounted for, the patterns we see are overall consistent with previous works.
+
+Direct comparisons of respiration rates with previous studies are difficult because of the differences in unit of measurement, length-weight conversions, and temperature of measurements. We therefore assessed the validity of our mass-specific respiration rates by exploring if respiration rate can meet feeding demands. We focus on adult female rates as they are the most commonly measured group in other studies [26,31,37]. Our experimentally derived mass-specific respiration value of 0.12 mL O2/mg C/hour equates to 2.88 mL O2/mg C/day. Oxygen respiration can then be converted into respired carbon using a respiratory quotient (RQ) between 0.8 and 1.0. i.e., respired carbon = respired oxygen \* RQ \* 12/22.4 [52]. Thus, in our study females respired 1.23 to 1.54 mg C food /mg C copepod /day, which is equivalent to 123%-154% of their body weight in carbon per day. To sustain such costs, the copepods must ingest approximately 3x this amount of carbon per day [53], equivalent to 369% - 462% of their body weight in carbon. Given the average weight of adult females in our study is \~4 µg C (Fig 2), the required amount of carbon ingested per day is 14.76-18.48 µg C, which aligns with prior work that measured ingestion rates of adult female *A. tonsa* at replete food levels between \~10-20 µg C/female/day [54].
+
+This study represents a step toward understanding the full effects of acute naupliar warming exposure on copepod ontogeny. If this experimental design is to be applied to the real-world environment, we recommend additions to the methodology. Primarily, increasing the time of exposure from 1 day to 5 or more days, to match the accepted definition of marine heat waves, which would increase the applicability of this design to real-world warming scenarios. Additionally, incorporating measurements of more life-history traits (e.g., fecundity and egg hatching success, grazing rate), which would provide a more comprehensive view of the organismal response to acute warming exposure through ontogeny. And finally, replicating this experimental design across food concentrations could highlight compensatory feeding in response to the acute warming exposure as indicated by our conversion of mass-specific respiration rates into ingestion rates.
+
+In summary, our results show that the ecologically important coastal copepod *Acartia tonsa* is metabolically resilient to acute naupliar warming. We observed no carryover effects throughout development of a metabolically impactful naupliar temperature exposure, with no differences in respiration and body size through development or copepodid development time. This resilience may be important for fisheries recruitment and the global biological carbon cycle in a changing climate, as these are powered at least in part by copepod-mediated processes.
+
+# Acknowledgements
+
+We thank Catherine Matassa and George McManus for their useful feedback. This research was supported by a National Science Foundation Grant (OCE 1947965) awarded to H. G. Dam.
+
+\newpage
+
+# References
+
+1.  Hunter, J. R. Feeding Ecology and predation of marine fish larvae. In Lasker, R., ed. [Internet]. 1981 [cited 2022 Dec 6]; 1:34-77. Available from: <https://swfsc-publications.fisheries.noaa.gov/publications/CR/1981/8122.PDF>
+
+2.  Castonguay, M., Plourde, S., Robert, D., Runge, J. A., & Fortier, L. Copepod production drives recruitment in a marine fish. Canadian Journal of Fisheries and Aquatic Sciences [Internet]. 2008 Aug [cited 2022 Dec 6]; 65(8): 1528-1531. Available from: <https://doi.org/10.1139/F08-126>
+
+3.  Humes, A. G. How many copepods? Ecology and morphology of copepods [Internet]. 1994 [cited 2022 Dec 6]; 1-7. Available from: <https://doi.org/10.1007/978-94-017-1347-4_1>.
+
+4.  Turner, J. T.Sinking rates of fecal pellets from the marine copepod Pontella meadii. Marine Biology [Internet]. 1977 Mar [cited 2022 Dec 6]; 40(3): 249-259. Available from: <https://doi.org/10.1007/BF00390880>
+
+5.  Longhurst, A. R., & Harrison, W. G. The biological pump: profiles of plankton production and consumption in the upper ocean. Progress in Oceanography. [Internet]. 1989 [cited 2022 Dec 6]; 22(1): 47-123. Available from: [https://doi.org/10.1016/0079-6611(89)90010-4](https://doi.org/10.1016/0079-6611(89)90010-4){.uri}
+
+6.  Ghalambor, C. K., McKay, J. K., Carroll, S. P., & Reznick, D. N. Adaptive versus non‐adaptive phenotypic plasticity and the potential for contemporary adaptation in new environments. Functional ecology [Internet]. 2007 Apr 27 [cited 2022 Dec 6]; 21(3): 394-407. Available from: <https://doi.org/10.1111/j.1365-2435.2007.01283.x>
+
+7.  Hoffmann, A. A., & Sgrò, C. M. Climate change and evolutionary adaptation. Nature. [Internet] 2011 Feb 23 [cited 2022 Dec 6]; 470(7335): 479-485. Available from: <https://doi.org/10.1038/nature09670>
+
+8.  IPCC, 2022: Climate Change 2022: Impacts, Adaptation, and Vulnerability. Contribution of Working Group II to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change [H.-O. Pörtner, D.C. Roberts, M. Tignor, E.S. Poloczanska, K. Mintenbeck, A. Alegría, M. Craig, S. Langsdorf, S. Löschke, V. Möller, A. Okem, B. Rama (eds.)]. Cambridge University Press. In Press.
+
+9.  Huey, R. B. Temperature, physiology, and the ecology of reptiles. Biology of the Reptilia. [Internet] 1982 [cited 2022 Dec 6]; 25-74.
+
+10. Schulte, P. M. The effects of temperature on aerobic metabolism: towards a mechanistic understanding of the responses of ectotherms to a changing environment. The Journal of experimental biology [Internet] 2015 Jun [cited 2022 Dec 6]; 218(12): 1856-1866. Available from: <https://doi.org/10.1242/jeb.118851>
+
+11. Oliver, E. C., Donat, M. G., Burrows, M. T., Moore, P. J., Smale, D. A., Alexander, L. V., et al., Longer and more frequent marine heatwaves over the past century. Nature communications [Internet] 2018 Apr 10 [cited 2022 Dec 6]; 9(1): 1-12. Available from: <https://doi.org/10.1038/s41467-018-03732-9>
+
+12. Hobday, A. J., Alexander, L. V., Perkins, S. E., Smale, D. A., Straub, S. C., Oliver, E. C. et al. A hierarchical approach to defining marine heatwaves. Progress in Oceanography [Internet] 2016 Feb 1 [cited 2022 Dec 6]; 141: 227-238. Available from: <https://doi.org/10.1016/j.pocean.2015.12.014>
+
+13. Sasaki, M. C., & Dam, H. G. Global patterns in copepod thermal tolerance, Journal of Plankton Research [Internet] 2021 July 5 [cited 2022 Dec 6]; 43(4): 598-609. Available from: <https://doi.org/10.1093/plankt/fbab044>
+
+14. Heinle, D. R. Temperature and zooplankton. Chesapeake Science. [Internet] 1969 Sep [cited 2022 Dec 6]; 10(3): 186-209. Available from: <https://doi.org/10.2307/1350456>
+
+15. Huntley, M. E., & Lopez, M. D. Temperature-dependent production of marine copepods: a global synthesis. The American Naturalist. [Internet] 1992 Aug 1 [cited 2022 Dec 6]; 140(2): 201-242. Available from: <https://doi.org/10.1086/285410>
+
+16. Ikeda, T., Kanno, Y., Ozaki, K., & Shinada, A. Metabolic rates of epipelagic marine copepods as a function of body mass and temperature. Marine Biology. [Internet] 2001 Sep [cited 2022 Dec 6]; 139(3): 587-596. Available from: <https://doi.org/10.1007/s002270100608>
+
+17. Sekiguchi, H., McLaren, I. A., & Corkett, C. J. Relationship between growth rate and egg production in the copepod Acartia clausi hudsonica. Marine Biology. [Internet] 1980 Oct [ cited 2022 Dec 6]; 58(2): 133-138. Available from: <https://doi.org/10.1007/BF00396124>
+
+18. Dam, H. G., & Peterson, W. T. The effect of temperature on the gut clearance rate constant of planktonic copepods. Journal of Experimental Marine Biology and Ecology. [Internet] 1988 Nov 10 [cited 2022 Dec 6]; 123(1): 1-14. Available from: [https://doi.org/10.1016/0022-0981(88)90105-0](https://doi.org/10.1016/0022-0981(88)90105-0){.uri}
+
+19. Wlodarczyk, E., Durbin, A. G., & Durbin, E. G. Effect of temperature on lower feeding thresholds, gut evacuation rate, and diel feeding behavior in the copepod Acartia hudsonica. Marine Ecology Progress Series. [Internet] 1992 Aug 27 [cited 2022 Dec 6]; 93-106. Available from: <https://www.jstor.org/stable/24829923>
+
+20. Brown, J. H., Gillooly, J. F., Allen, A. P., Savage, V. M., & West, G. B. Toward a metabolic theory of ecology. Ecology. [Internet] 2004 Jul 1 [cited 2022 Dec 6]; 85(7): 1771-1789. Available from: <https://doi.org/10.1890/03-9000>
+
+21. Thor, P. Relationship between specific dynamic action and protein deposition in calanoid copepods. Journal of experimental marine biology and ecology. [Internet] 2000 Mar 15 [cited 2022 Dec 6]; 245(2): 171-182. Available from: [https://doi.org/10.1016/S0022-0981(99)00159-8](https://doi.org/10.1016/S0022-0981(99)00159-8){.uri}
+
+22. Thor, P., Cervetto, G., Besiktepe, S., Ribera-Maycas, E., Tang, K. W., & Dam, H. G. Influence of two different green algal diets on specific dynamic action and incorporation of carbon into biochemical fractions in the copepod Acartia tonsa. Journal of Plankton Research. [Internet] 2022 Apr 1 [cited 2022 Dec 6]; 24(4): 293-300. Available from: <https://doi.org/10.1093/plankt/24.4.293>
+
+23. Ikeda, T., Sano, F., & Yamaguchi, A. Respiration in marine pelagic copepods: a global-bathymetric model. Marine Ecology Progress Series. [Internet] 2007 Jun 6 [cited 2022 Dec 6]. 339: 215-219. Available from: <https://www.int-res.com/abstracts/meps/v339/p215-219/>
+
+24. Heine, K. B., Abebe, A., Wilson, A. E., & Hood, W. R. Copepod respiration increases by 7percent per °C increase in temperature: A meta‐analysis. Limnology and Oceanography Letters. [Internet] 2019 Apr 1 [cited 2022 Dec 6]. 4(3): 53-61. Available from: <https://doi.org/10.1002/lol2.10106>
+
+25. Hoekstra, L. A., & Montooth, K. L. Inducing extra copies of the Hsp70 gene in Drosophila melanogaster increases energetic demand. BMC evolutionary biology. [Internet] 2014 Mar 19 [cited 2022 Dec 6]. 13(1): 1-11. Available from: <https://doi.org/10.1186/1471-2148-13-68>
+
+26. Hochachka, P. W., & Somero, G. N. Biochemical adaptation: mechanism and process in physiological evolution. [Internet]. Oxford university press; 2002 [cited 2022 Dec 6]. 237 p.
+
+27. Rahlff, J., Peters, J., Moyano, M., Pless, O., Claussen, C., Peck, M. A., et al. Short-term molecular and physiological responses to heat stress in neritic copepods Acartia tonsa and Eurytemora affinis. Comparative Biochemistry and Physiology Part A: Molecular & Integrative Physiology. [Internet] 2017 Jan [cited 2022 Dec 6]. 203: 348-358. Available from: <https://doi.org/10.1016/j.cbpa.2016.11.001>
+
+28. Glazier, D. S. Beyond the '3/4-power law': variation in the intra-and interspecific scaling of metabolic rate in animals. Biological reviews. [Internet] 2005 Aug 26 [cited 2022 Dec 6]; 80(4): 611-662. Available from: <https://doi.org/10.1017/S1464793105006834>
+
+29. Banse, K. Mass-scaled rates of respiration and intrinsic growth in very small invertebrates. Marine Ecology Progress Series. [Internet] 1982 Sep 15 [cited 2022 Dec 6]; 281-297. Available from: <https://www.jstor.org/stable/24814540>
+
+30. Kiørboe, T., & Hirst, A. G. Shifts in mass scaling of respiration, feeding, and growth rates across life-form transitions in marine pelagic organisms. The American Naturalist. [Internet] 2014 Apr [cited 2022 Dec 6]; 183(4): E118-E130.
+
+31. Epp, R. W., & Lewis Jr, W. M. The nature and ecological significance of metabolic changes during the life history of copepods. Ecology. [Internet] 1980 Apr 1 [cited 2022 Dec 6]; 61(2): 259-264. Available from: <https://doi.org/10.2307/1935183>
+
+32. Tangwancharoen, S., & Burton, R. S. Early life stages are not always the most sensitive: heat stress responses in the copepod Tigriopus californicus. Marine Ecology Progress Series. [Internet] 2014 Dec 15 [cited 2022 Dec 6]; 517: 75-83. Available from: <https://doi.org/10.3354/meps11013>
+
+33. Sasaki, M. C., & Dam, H. G. Integrating patterns of thermal tolerance and phenotypic plasticity with population genetics to improve understanding of vulnerability to warming in a widespread copepod. Global change biology. [Internet] 2019 Aug 26 [cited 2022 Dec 6]; 25(12): 4147-4164. Available from: <https://doi.org/10.1111/gcb.14811>
+
+34. Köster M., Krause C., Paffenhöfer G. Time-series measurements of oxygen consumption of copepod nauplii. Mar Ecol Prog Ser. [Internet] 2008 Jan 17 [cited 2022 Dec 6]. 353:157-164. Available from: <https://doi.org/10.3354/meps07185>
+
+35. Rasband, W.S., ImageJ, U. S. National Institutes of Health, Bethesda, Maryland, USA, <https://imagej.nih.gov/ij/>, 1997-2018.
+
+36. Berggreen, U., Hansen, B., & Kiørboe, T. Food size spectra, ingestion and growth of the copepod Acartia tonsa during development: Implications for determination of copepod production. Marine biology. [Internet] 1988 Oct [cited 2022 Dec 6]; 99(3): 341-352. Available from: <https://doi.org/10.1007/BF02112126>
+
+37. Thor, P. Elevated respiration rates of the neritic copepod Acartia tonsa during recovery from starvation. Journal of experimental marine biology and ecology. [Internet] 2003 Jan 15 [cited 2022 Dec 6]; 283(1-2): 133-143. Available from: [https://doi.org/10.1016/S0022-0981(02)00473-2](https://doi.org/10.1016/S0022-0981(02)00473-2){.uri}
+
+38. R Core Team (2022). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL <https://www.R-project.org/>.
+
+39. Harianto, J., Carey, N., & Byrne, M. respR---An R package for the manipulation and analysis of respirometry data. Methods in Ecology and Evolution. [Internet] 2019 Jun 10 [cited 2022 Dec 6]; 10(6): 912-920. Available from: <https://doi.org/10.1111/2041-210X.13162>
+
+40. Russell V. Lenth (2022). emmeans: Estimated Marginal Means, aka Least-Squares Means. R package version 1.7.5.https://CRAN.R-project.org/package=emmeans
+
+41. Zuur AF, Ieno EN, Walker NJ, Saveliev AA, Smith GM. Mixed effects models and extensions in ecology with R. New York: Springer; 2009 Jan.
+
+42. Pinheiro J, Bates D, R Core Team. nlme: Linear and Nonlinear Mixed Effects Models. R package version 3.1-160. [Internet] 2007 Oct 4 [cited 2022 Dec 6]; 1-89 p. Available from: <https://CRAN.R-project.org/package=nlme>.
+
+43. Ikeda, T. Relationship between respiration rate and body size in marine plankton animals as a function of the temperature of habitat. Hokkaido University Fisheries Research Bulletin. [Internet] 1970 Aug [cited 2022 Dec 6]; 21(2): 91-112. Available from: <https://eprints.lib.hokudai.ac.jp/dspace/handle/2115/23417>
+
+44. Petkeviciute, E., Kania, P. W., & Skovgaard, A. Genetic responses of the marine copepod Acartia tonsa (Dana) to heat shock and epibiont infestation. Aquaculture Reports. [Internet] 2015 Nov [cited 2022 Dec 6]; 2: 10-16. Available from: <https://doi.org/10.1016/j.aqrep.2015.04.001>
+
+45. Siuda, A. N., & Dam, H. G. Effects of omnivory and predator‐prey elemental stoichiometry on planktonic trophic interactions. Limnology and Oceanography. [Internet] 2010 Sep 1 [cited 2022 Dec 6]; 55(5): 2107-2116. Available from: <https://doi.org/10.4319/lo.2010.55.5.2107>
+
+46. Calliari, D., Borg, M. C. A., Thor, P., Gorokhova, E., & Tiselius, P. Instantaneous salinity reductions affect the survival and feeding rates of the co-occurring copepods Acartia tonsa Dana and A. clausi Giesbrecht differently. Journal of Experimental Marine Biology and Ecology. [Internet] 2008 Jul 18 [cited 2022 Dec 6]; 362(1): 18-25. Available from: <https://doi.org/10.1016/j.jembe.2008.05.005>
+
+47. Brennan, R. S., J.A. deMayo, H.G. Dam, M.B. Finiguerra, H. Baumann, and M.H. Pespeni. Loss of transcriptional plasticity but sustained adaptive capacity after adaptation to global change conditions in a marine copepod. Nat Commun. [Internet] 2022 Mar 3 [cited 2022 Dec 6]; 13: 1147. Available from: <https://doi.org/10.1038/s41467-022-28742->
+
+48. Nilsson, B., Jepsen, P. M., Rewitz, K., & Hansen, B. W. Expression of hsp70 and ferritin in embryos of the copepod Acartia tonsa (Dana) during transition between subitaneous and quiescent state. Journal of plankton research. [Internet] 2014 Mar/Apr [cited 2022 Dec 6]; 36(2): 513-522. Available from: <https://doi.org/10.1093/plankt/fbt099>
+
+49. Harrison, F., Jon, Biewener, A., Bernhardt, R., Bernhardt. J.R., Burger, J.R., et al. White Paper: An Integrated Perspective on the Causes of Hypometric Metabolic Scaling in Animals, Integrative and Comparative Biology. [Internet] 2022 Nov [cited 2022 Dec 6]; 62(5): 1395-1418. Available from: <https://doi.org/10.1093/icb/icac136>
+
+50. Drillet, G., Goetze, E., Jepsen, P. M., Højgaard, J. K., & Hansen, B. W. Strain-specific vital rates in four Acartia tonsa cultures, I: strain origin, genetic differentiation and egg survivorship. Aquaculture. [Internet] 2008 Jul 2 [cited 2022 Dec 6]; 280(1-4): 109-116. Available from: <https://doi.org/10.1016/j.aquaculture.2008.04.010>
+
+51. Geburzi, J. C., Heuer, N., Homberger, L., Kabus, J., Moesges, Z., Ovenbeck, et al. An environmental gradient dominates ecological and genetic differentiation of marine invertebrates between the North and Baltic Sea. Ecology and Evolution. [Internet] 2022 May 20 [cited 2022 Dec 6]; 12(5): e8868. Available from: <https://doi.org/10.1002/ece3.8868>
+
+52. Omori, M. and T. Ikeda. Methods in Marine Zooplankton Ecology. New York: John Wiley & Sons; 1984. 332 pp.
+
+53. Valiela I. Marine Ecological Processes. New York: Springer-Verlag; 1984. 546 p.
+
+54. Besiktepe, S., & Dam, H. G. Effect of diet on the coupling of ingestion and egg production in the ubiquitous copepod, Acartia tonsa. Progress in Oceanography. [Internet] 2020 Jul [cited 2022 Dec 6]; 186: 102346. Available from: <https://doi.org/10.1016/j.pocean.2020.102346>
+
+\newpage
+
+```{=tex}
+\beginsupplement
+```
+# Supplementary Material
+
+```{r supp-table-1, echo = F, message = F, warning = F}
+#Emmeans post-hoc analysis of selected body length model
+knitr::kable(emmeans::emmeans(bl_m.6,  pairwise ~ stage : sex )$emmeans, 
+             digits = 3, align = "c",
+             caption = "Stage-specific comparison of body length (mm) between sexes of *Acartia tonsa*. Output of post hoc estimated marginal means analysis comparing body length (mm) between sexes at each copepodid stage across the two temperature treatments.")
+```
+
+```{r supp-table-2, echo = F}
+c6_handling_anova = full_dataset %>%
+  filter(stage == "c6")
+#Comparison of C6 mass-spec resp between actively handled and handling controls
+
+#RUN THESE OPTIONS BEFORE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+msrh_m0 <- lme(mass_spec_resp ~ group * sex* treatment, random = ~1|replicate/id,data = c6_handling_anova)
+msrh_m.1 <- update(msrh_m0, weights = varIdent(form = ~1|stage))
+msrh_m.2 <- update(msrh_m0, weights = varIdent(form = ~1|sex))
+msrh_m.3 <- update(msrh_m0, weights = varIdent(form = ~1|treatment))
+msrh_m.4 <- update(msrh_m0, weights = varIdent(form = ~1|stage*sex))
+msrh_m.5 <- update(msrh_m0, weights = varIdent(form = ~1|sex*treatment))
+msrh_m.6 <- update(msrh_m0, weights = varIdent(form = ~1|stage*treatment))
+msrh_m.7 <- update(msrh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
+
+#anova(msrh_m0,msrh_m.1, msrh_m.2, msrh_m.3, msrh_m.4, msrh_m.5, msrh_m.6, msrh_m.7)
+
+knitr::kable(car::Anova(msrh_m.4, Test="F", type = 3), 
+             digits = 3, align = "c",
+             caption = "Effects of experimental handling on C6 mass-specific respiration rates. Three-way ANOVA comparing C6 mass-specific respiration rates between actively handled and handling control individuals.")
+```
+
+```{r supp-table-3, echo = F}
+#Comparison of C6 body lengths between actively handled and handling controls
+blh_m0 <- lme(body_length ~ group * sex* treatment, random = ~1|replicate/id,data = c6_handling_anova)
+blh_m.1 <- update(blh_m0, weights = varIdent(form = ~1|stage))
+blh_m.2 <- update(blh_m0, weights = varIdent(form = ~1|sex))
+blh_m.3 <- update(blh_m0, weights = varIdent(form = ~1|treatment))
+blh_m.4 <- update(blh_m0, weights = varIdent(form = ~1|stage*sex))
+blh_m.5 <- update(blh_m0, weights = varIdent(form = ~1|sex*treatment))
+blh_m.6 <- update(blh_m0, weights = varIdent(form = ~1|stage*treatment))
+blh_m.7 <- update(blh_m0, weights = varIdent(form = ~1|stage*sex*treatment))
+
+#anova(blh_m0,blh_m.1, blh_m.2, blh_m.3, blh_m.4, blh_m.5, blh_m.6, blh_m.7)
+
+knitr::kable(car::Anova(blh_m0, Test="F", type = 3), 
+             digits = 3, align = "c",
+             caption = "Effects of experimental handling on C6 body lengths (mm). Three-way ANOVA comparing C6 body lengths through development between sexes and actively handled versus handling control individuals.")
+```
+
+```{r supp-table-4, echo = F}
+#Remake dev time data df
+dev_time_data = molt_record %>% filter(stage %in% c("c1","c6"))%>%
+  group_by(id, stage)%>%
+  filter(date == min(date))%>%
+  ungroup(stage)%>%
+  mutate("dev_time" = lead(days) - days)%>%
+  drop_na("dev_time", "sex") %>%
+  dplyr::select(-stage,-days) %>%
+  separate(id, c("replicate", "id_original"), sep = "_", remove=F)
+
+#RUN THESE OPTIONS BEFORE MODELS
+options(contrasts=c("contr.sum","contr.poly"))
+
+dth_m0 <- lme(dev_time ~ group* sex * treatment, random = ~1|replicate/id,data = dev_time_data,control = lmeControl(opt = "optim"))
+dth_m.1 <- update(dth_m0, weights = varIdent(form = ~1|sex))
+dth_m.2 <- update(dth_m0, weights = varIdent(form = ~1|treatment))
+dth_m.3 <- update(dth_m0, weights = varIdent(form = ~1|sex*treatment))
+
+#Comparisons of models built
+#anova(dth_m0,dth_m.1, dth_m.2, dth_m.3)
+
+#Residual plot
+#plot(dth_m.3)
+#m.3.e <- resid(dth_m.3, type = 'pearson')
+#Q-Q plot
+#qqnorm(m.3.e); qqline(m.3.e, col = 2)
+
+#Summary and stats of selected model
+#summary(dth_m.3)
+knitr::kable(car::Anova(dth_m.3, test="F", type = 3), 
+             digits = 3, align = "c",
+             caption = "Effects of experimental handling on copepodid development time. Three-way ANOVA comparing copepodid development time between sexes and actively handled versus handling control individuals.")
+```
+
+```{r supp-fig-1, echo = F}
+#| fig.cap = "Example oxygen profile. Scaled oxygen profile of a single vial (% initial saturation). Control lines (black) show background change in oxygen determined from two control vials (no copepod included). The copepod line (gold) shows oxygen drawdown from a vial containing a single copepodid. Respiration rates are estimated as the slope of the copepod line after accounting for the average slope of the control lines."
+
+knitr::include_graphics("../Output/Figures/Markdown/S_Fig1-1.pdf") #Use this when filling in figures from analysis 
+```
+
+```{r supp-fig-2, echo = F}
+#| fig.cap = "Kaplan-Meier survival of Acartia tonsa. Kaplan-Meier survival proportion of actively handled individuals for both experimental groups over time. Different treatments are indicated by different line colors. Shading around each line represents Control CI: ±0.14, S.E. = 0.07. Treatment CI: ±0.18, S.E. = 0.09. CI = confidence interval."
+
+knitr::include_graphics("../Output/Figures/Markdown/S_Fig2-1.pdf") #Use this when filling in figures from analysis 
+```
+
+```{r supp-fig-3, echo = F}
+#| fig.cap = "Cox proportional hazard ratios of Acartia tonsa mortality. Cox proportional hazard ratios showing effect of treatment (experimental group) and experimental replicate on likelihood of mortality. Sample sizes are indicated below group identities. The hazard ratio (S.E.±0.059) is stated in the third column. P-values are shown alongside each point."
+
+knitr::include_graphics("../Output/Figures/Markdown/S_Fig3-1.pdf") #Use this when filling in figures from analysis 
+```
