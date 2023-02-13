@@ -95,7 +95,8 @@ naup_resp = ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = facto
   theme_matt() +
   theme(legend.position = "none")
 
-ggarrange(tpc, naup_resp, nrow = 1, labels = "AUTO")
+ggarrange(tpc, naup_resp, nrow = 1, labels = "AUTO",
+          font.label = list(size = 24, color = "black", face = "bold", family = NULL))
 ```
 
 <img src="../Figures/markdown/Fig1-1.png" style="display: block; margin: auto;" />
@@ -121,8 +122,9 @@ full_dataset %>% filter(group == "active")%>% drop_na(sex)%>%
   labs(x = "Copepodid Stage",
        y = "Body Length (um)",
        fill = "Experimental Group") +
-  theme_bw(base_size = 18) + 
-  theme(panel.grid = element_blank())
+  theme_bw(base_size = 24) + 
+  theme(panel.grid = element_blank(),
+        legend.position = "bottom")
 ```
 
 <img src="../Figures/markdown/Fig2-1.png" style="display: block; margin: auto;" />
@@ -209,7 +211,8 @@ mass_spec_plot = ggplot(temp_df_resp, aes(x = stage, y = mass_spec_resp,
   theme_matt()
 
 #Combining the two plots into one figure
-ggarrange(resp_plot, mass_spec_plot, nrow = 1, common.legend = T, labels = "AUTO", legend = "bottom") 
+ggarrange(resp_plot, mass_spec_plot, nrow = 1, common.legend = T, labels = "AUTO", legend = "bottom",
+          font.label = list(size = 24, color = "black", face = "bold", family = NULL)) 
 ```
 
 <img src="../Figures/markdown/Fig3-1.png" style="display: block; margin: auto;" />
@@ -233,16 +236,16 @@ xlabs = c("Control", "Heat Stress")
 
 ggplot(dev_time_data, aes(x=treatment, y=dev_time, fill=treatment)) +
   geom_boxplot(outlier.shape=NA) + 
-  geom_point(position=position_jitter(width=0.10, height=0.00), 
+  geom_point(position=position_jitter(width=0.05, height=0.00), 
              size = 2) +
   facet_grid(.~new_sex) +
   scale_fill_manual(labels = c("Control", "Heat Stress"), 
                     values = c("lightskyblue", "tomato2")) +
   labs(x = "Treatment",
-       y = "Total Development Time from C1-C6 (days)",
+       y = "Total Development Time \n(days from C1-C6 )",
        fill = "Experimental Group") +
   scale_x_discrete(labels = xlabs) + 
-  theme_matt() + 
+  theme_matt(base_size = 20) + 
   theme(legend.position = "none")
 ```
 
@@ -263,7 +266,7 @@ df1 = full_dataset %>%
 ggplot(aes(x= weight_mgC, y=mass_spec_resp), data=df1)+
   labs(x = "Mass (mg Carbon)",
        y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg Carbon)") +
-  geom_smooth(method = "lm", formula = (y~x)) +
+  geom_smooth(method = "lm", formula = (y~x), linewidth = 2) +
   geom_point()+
   scale_x_log10()+
   scale_y_log10() +
