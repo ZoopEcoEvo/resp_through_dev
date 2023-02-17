@@ -197,7 +197,7 @@ temp_df_resp$stage = factor(temp_df_resp$stage, levels = c("n", "c1", "c2", "c3"
 #Per capita respiration plot
 resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h, 
                                      fill = treatment, colour = treatment)) + 
-  geom_hline(yintercept = 0, size = 1) + 
+  geom_hline(yintercept = 0, linewidth = 1) + 
   geom_boxplot(colour = "black", outlier.shape=NA) +
   geom_point(position = position_dodge(width=0.75),
              color = "black", size=0.85) + 
@@ -211,7 +211,7 @@ resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h,
 #Mass-specific respiration plot
 mass_spec_plot = ggplot(temp_df_resp, aes(x = stage, y = mass_spec_resp, 
                                           fill = treatment, colour = treatment)) + 
-  geom_hline(yintercept = 0, size = 1) + 
+  geom_hline(yintercept = 0, linewidth = 1) + 
   geom_boxplot(colour = "black", outlier.shape=NA) +
   geom_point(position = position_dodge(width = 0.75), color = "black", size = 0.85) + 
   scale_fill_manual(values = treatment_color_vector)+ 
