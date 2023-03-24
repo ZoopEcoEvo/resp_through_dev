@@ -3,7 +3,7 @@ ontogenetic effects on respiration, body size, or development time in
 the copepod Acartia tonsa
 ================
 Mathew Holmes-Hackerd
-2023-02-12
+2023-03-24
 
 - <a href="#figures" id="toc-figures">Figures</a>
   - <a href="#figure-1" id="toc-figure-1">Figure 1</a>
@@ -77,7 +77,7 @@ tpc = ggplot(mort_data, aes(x = stress_temp, y = survivorship)) +
               method.args = list(family = "binomial"), 
               linewidth = 1.2, colour = "black") + 
   scale_y_continuous(breaks = c(0, 0.5, 1)) + 
-  xlab("Stress Temperature (degrees C)") +
+  xlab("Stress Temperature (°C)") +
   ylab("Individual Survivorship") + 
   theme_matt()
 
@@ -86,7 +86,7 @@ naup_resp = ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = facto
   geom_boxplot(outlier.size = 0.0, outlier.shape=NA) +
   geom_point(position = position_dodge(width=0.75)) +
   labs(
-    x = "Temperature (C)", 
+    x = "Temperature (°C)", 
     y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg Carbon)",
     fill = "Temperature")+
   scale_x_continuous(breaks = c(18, 28)) + 
@@ -108,7 +108,7 @@ axis_weights = c(400, 600, 800)
 break_weights = (axis_weights^2.92 * (1.11*10^-5))
 
 full_dataset %>% filter(group == "active")%>% drop_na(sex)%>%
-  mutate(new_sex = ifelse(sex %in% c("man", "Male", "M", "MALE"), "Male", "Female")) %>%
+  mutate(new_sex = ifelse(sex == "M", "Male", "Female")) %>%
   ggplot(aes(x=stage, y=length_um, fill=treatment)) +
   facet_grid(.~new_sex) +
   geom_boxplot(lwd=0.25, outlier.shape=NA) +
@@ -119,7 +119,7 @@ full_dataset %>% filter(group == "active")%>% drop_na(sex)%>%
                       breaks = round(break_weights, digits=0))) +
   scale_fill_manual(labels = c("Control", "Heat Stress"), 
                     values = c("lightskyblue", "tomato2")) +
-  labs(x = "Copepodid Stage",
+  labs(x = "Stage",
        y = "Body Length (um)",
        fill = "Experimental Group") +
   theme_bw(base_size = 24) + 
@@ -140,40 +140,40 @@ temp_naup_resp = naup_resp_rates %>%
   filter(msr_B88>0, temp == "18") %>%
   dplyr::select(10,11)
 
-temp_naup_resp$stage <- "n"
+temp_naup_resp$stage = "n"
 temp_naup_resp$treatment = "control"
 
 names(temp_naup_resp)[2] = "mass_spec_resp"
 temp_naup_resp
-##        resp_mL_h mass_spec_resp stage treatment
-## 1  -4.483746e-05     0.45078516     n   control
-## 2  -3.029700e-05     0.30459876     n   control
-## 3  -4.122780e-05     0.41449446     n   control
-## 4  -3.347084e-05     0.33650781     n   control
-## 5  -2.807363e-05     0.28224561     n   control
-## 6  -3.943879e-05     0.39650822     n   control
-## 7  -4.051310e-05     0.40730903     n   control
-## 8  -9.614350e-06     0.09666038     n   control
-## 9  -2.804141e-05     0.28192165     n   control
-## 10 -4.104596e-05     0.41266626     n   control
-## 11 -2.388061e-05     0.28546319     n   control
-## 12 -2.675768e-05     0.31985498     n   control
-## 13 -1.507671e-05     0.18022341     n   control
-## 14 -1.886526e-05     0.22551079     n   control
-## 15 -1.716566e-05     0.20519418     n   control
-## 16 -2.586087e-05     0.30913465     n   control
-## 17 -2.648858e-05     0.31663815     n   control
-## 18 -3.446428e-05     0.41197786     n   control
-## 19 -3.693470e-05     0.44150861     n   control
-## 20 -2.609258e-05     0.31190455     n   control
-## 21 -1.302461e-05     0.18417205     n   control
-## 22 -1.207957e-05     0.17080888     n   control
-## 23 -1.466792e-05     0.20740898     n   control
-## 24 -2.251435e-05     0.31836002     n   control
-## 25 -1.707390e-05     0.24143028     n   control
-## 26 -1.619984e-05     0.22907084     n   control
-## 27 -1.397062e-05     0.19754893     n   control
-## 28 -1.709480e-05     0.24172585     n   control
+##         resp_mL_h mass_spec_resp stage treatment
+## 1  -0.00004483746     0.45078516     n   control
+## 2  -0.00003029700     0.30459876     n   control
+## 3  -0.00004122780     0.41449446     n   control
+## 4  -0.00003347084     0.33650781     n   control
+## 5  -0.00002807363     0.28224561     n   control
+## 6  -0.00003943879     0.39650822     n   control
+## 7  -0.00004051310     0.40730903     n   control
+## 8  -0.00000961435     0.09666038     n   control
+## 9  -0.00002804141     0.28192165     n   control
+## 10 -0.00004104596     0.41266626     n   control
+## 11 -0.00002388061     0.28546319     n   control
+## 12 -0.00002675768     0.31985498     n   control
+## 13 -0.00001507671     0.18022341     n   control
+## 14 -0.00001886526     0.22551079     n   control
+## 15 -0.00001716566     0.20519418     n   control
+## 16 -0.00002586087     0.30913465     n   control
+## 17 -0.00002648858     0.31663815     n   control
+## 18 -0.00003446428     0.41197786     n   control
+## 19 -0.00003693470     0.44150861     n   control
+## 20 -0.00002609258     0.31190455     n   control
+## 21 -0.00001302461     0.18417205     n   control
+## 22 -0.00001207957     0.17080888     n   control
+## 23 -0.00001466792     0.20740898     n   control
+## 24 -0.00002251435     0.31836002     n   control
+## 25 -0.00001707390     0.24143028     n   control
+## 26 -0.00001619984     0.22907084     n   control
+## 27 -0.00001397062     0.19754893     n   control
+## 28 -0.00001709480     0.24172585     n   control
 temp_naup_resp$resp_mL_h = temp_naup_resp$resp_mL_h * -1
 
 temp_plot_data = plot_data %>%
@@ -184,16 +184,18 @@ temp_plot_data = plot_data %>%
 temp_df_resp = rbind(temp_naup_resp, temp_plot_data)
 temp_df_resp$stage = factor(temp_df_resp$stage, levels = c("n", "c1", "c2", "c3", "c4", "c5", "c6"))
 
+options(scipen=999)
+
 #Per capita respiration plot
 resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h, 
                                      fill = treatment, colour = treatment)) + 
-  geom_hline(yintercept = 0, size = 1) + 
+  geom_hline(yintercept = 0, linewidth = 1) + 
   geom_boxplot(colour = "black", outlier.shape=NA) +
   geom_point(position = position_dodge(width=0.75),
              color = "black", size=0.85) + 
   scale_fill_manual(labels = c("Control", "Heat Stress"), 
                     values = c("lightskyblue", "tomato2")) +
-  labs(x = "Copepodid Stage",
+  labs(x = "Stage",
        y = " Per Capita Respiration \n (mL Oxygen/hour/individual)",
        fill = "Experimental Group") +
   theme_matt() 
@@ -201,11 +203,11 @@ resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h,
 #Mass-specific respiration plot
 mass_spec_plot = ggplot(temp_df_resp, aes(x = stage, y = mass_spec_resp, 
                                           fill = treatment, colour = treatment)) + 
-  geom_hline(yintercept = 0, size = 1) + 
+  geom_hline(yintercept = 0, linewidth = 1) + 
   geom_boxplot(colour = "black", outlier.shape=NA) +
   geom_point(position = position_dodge(width = 0.75), color = "black", size = 0.85) + 
   scale_fill_manual(values = treatment_color_vector)+ 
-  labs(x = "Copepodid Stage", 
+  labs(x = "Stage", 
        y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg C)",
        fill = "Experimental Group") +
   theme_matt()

@@ -122,7 +122,7 @@ tpc = ggplot(mort_data, aes(x = stress_temp, y = survivorship)) +
               method.args = list(family = "binomial"), 
               linewidth = 1.2, colour = "black") + 
   scale_y_continuous(breaks = c(0, 0.5, 1)) + 
-  xlab("Stress Temperature (degrees C)") +
+  xlab("Stress Temperature (°C)") +
   ylab("Individual Survivorship") + 
   theme_matt()
 
@@ -131,7 +131,7 @@ naup_resp = ggplot(data=naup_resp_rates, aes(x = temp, y = msr_B88, fill = facto
   geom_boxplot(outlier.size = 0.0, outlier.shape=NA) +
   geom_point(position = position_dodge(width=0.75)) +
   labs(
-    x = "Temperature (C)", 
+    x = "Temperature (°C)", 
     y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg Carbon)",
     fill = "Temperature")+
   scale_x_continuous(breaks = c(18, 28)) + 
@@ -150,7 +150,7 @@ axis_weights = c(400, 600, 800)
 break_weights = (axis_weights^2.92 * (1.11*10^-5))
 
 full_dataset %>% filter(group == "active")%>% drop_na(sex)%>%
-  mutate(new_sex = ifelse(sex %in% c("man", "Male", "M", "MALE"), "Male", "Female")) %>%
+  mutate(new_sex = ifelse(sex == "M", "Male", "Female")) %>%
   ggplot(aes(x=stage, y=length_um, fill=treatment)) +
   facet_grid(.~new_sex) +
   geom_boxplot(lwd=0.25, outlier.shape=NA) +
@@ -161,7 +161,7 @@ full_dataset %>% filter(group == "active")%>% drop_na(sex)%>%
                       breaks = round(break_weights, digits=0))) +
   scale_fill_manual(labels = c("Control", "Heat Stress"), 
                     values = c("lightskyblue", "tomato2")) +
-  labs(x = "Copepodid Stage",
+  labs(x = "Stage",
        y = "Body Length (um)",
        fill = "Experimental Group") +
   theme_bw(base_size = 24) + 
@@ -179,7 +179,7 @@ temp_naup_resp = naup_resp_rates %>%
   filter(msr_B88>0, temp == "18") %>%
   dplyr::select(10,11)
 
-temp_naup_resp$stage <- "n"
+temp_naup_resp$stage = "n"
 temp_naup_resp$treatment = "control"
 
 names(temp_naup_resp)[2] = "mass_spec_resp"
@@ -194,6 +194,8 @@ temp_plot_data = plot_data %>%
 temp_df_resp = rbind(temp_naup_resp, temp_plot_data)
 temp_df_resp$stage = factor(temp_df_resp$stage, levels = c("n", "c1", "c2", "c3", "c4", "c5", "c6"))
 
+options(scipen=999)
+
 #Per capita respiration plot
 resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h, 
                                      fill = treatment, colour = treatment)) + 
@@ -203,7 +205,7 @@ resp_plot = ggplot(temp_df_resp, aes(x = stage, y = resp_mL_h,
              color = "black", size=0.85) + 
   scale_fill_manual(labels = c("Control", "Heat Stress"), 
                     values = c("lightskyblue", "tomato2")) +
-  labs(x = "Copepodid Stage",
+  labs(x = "Stage",
        y = " Per Capita Respiration \n (mL Oxygen/hour/individual)",
        fill = "Experimental Group") +
   theme_matt() 
@@ -215,7 +217,7 @@ mass_spec_plot = ggplot(temp_df_resp, aes(x = stage, y = mass_spec_resp,
   geom_boxplot(colour = "black", outlier.shape=NA) +
   geom_point(position = position_dodge(width = 0.75), color = "black", size = 0.85) + 
   scale_fill_manual(values = treatment_color_vector)+ 
-  labs(x = "Copepodid Stage", 
+  labs(x = "Stage", 
        y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg C)",
        fill = "Experimental Group") +
   theme_matt()
