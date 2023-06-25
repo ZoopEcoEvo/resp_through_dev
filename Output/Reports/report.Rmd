@@ -215,12 +215,13 @@ mass_spec_plot = ggplot(temp_df_resp, aes(x = stage, y = mass_spec_resp,
                                           fill = treatment, colour = treatment)) + 
   geom_hline(yintercept = 0, linewidth = 1) + 
   geom_boxplot(colour = "black", outlier.shape=NA) +
-  geom_point(position = position_dodge(width = 0.75), color = "black", size = 0.85) + 
+  geom_point(position = position_dodge(width = 0.75), color = "black", size = 0.85, alpha = 0.7) + 
   scale_fill_manual(values = treatment_color_vector)+ 
   labs(x = "Stage", 
        y = "Mass-Specific Respiration \n (mL Oxygen/hour/mg C)",
        fill = "Experimental Group") +
-  theme_matt()
+  theme_matt() + 
+  theme(legend.position = "right")
 
 #Combining the two plots into one figure
 ggarrange(resp_plot, mass_spec_plot, nrow = 1, common.legend = T, labels = "AUTO", legend = "bottom",
