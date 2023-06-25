@@ -8,6 +8,7 @@ Mathew Holmes-Hackerd<sup>1</sup>, M.C. Sasaki<sup>1,2</sup>, Hans G. Dam<sup>1<
 This project tested the effects of naupliar heat stress on respiration through development in the copepod *Acartia tonsa*. Copepods were collected from Eastern Long Island Sound during the summer of 2020. 
 
 Data archived: [![DOI](https://zenodo.org/badge/563165816.svg)](https://zenodo.org/badge/latestdoi/563165816)
+Published manuscript: https://doi.org/10.1371/journal.pone.0282380 
 
 ## Directory Structure 
 The root directory contains the README and Licensing files, along with a .Rproj file and five sub-directories: Data, Manuscript, Output, Randomized_Setup, and Scripts.  
@@ -35,7 +36,7 @@ The `Data/` directory contains four directories, one for each type of data analy
     -   *stage*	- The individual's stage at the time of measurement. Recorded as c1-c6 (copepodite 1, etc.)
     -   *body_length * - The prosome length of the individual, measured in mm.  
 
--   `Molts` contains the ____. There is one file per experimental replicate. Data files include the following columns:   
+-   `Molts` contains the daily observations of individual copepod stages. There is one file per experimental replicate. Data files include the following columns:   
     -   *id* - The individual's unique ID. 	  
     -   *treatment*	- The treatment individuals were exposed to as nauplii - either 'control' or 'heatstress'.    
     -   *group* - Whether the individual was initially assigned to the actively observed group, or the back-up/handling control group.   
