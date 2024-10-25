@@ -7,9 +7,7 @@ Mathew Holmes-Hackerd<sup>1</sup>, M.C. Sasaki<sup>1,2</sup>, Hans G. Dam<sup>1<
 
 This project tested the effects of naupliar heat stress on respiration through development in the copepod *Acartia tonsa*. Copepods were collected from Eastern Long Island Sound during the summer of 2020. 
 
-Data archived: [![DOI](https://zenodo.org/badge/563165816.svg)](https://zenodo.org/badge/latestdoi/563165816)    
-
-Published manuscript: https://doi.org/10.1371/journal.pone.0282380     
+<a href="https://doi.org/10.1371/journal.pone.0282380"><img src="https://img.shields.io/badge/Publication%20Here-Here?style=for-the-badge&labelColor=grey&color=577D58"/></a>    <a href="https://doi.org/10.5281/zenodo.7434983"><img src="https://img.shields.io/badge/Dataset%20Here-Here?style=for-the-badge&labelColor=grey&color=EAB221"/></a>
 
 ## Directory Structure 
 The root directory contains the README and Licensing files, along with a .Rproj file and five sub-directories: Data, Manuscript, Output, Randomized_Setup, and Scripts.  
